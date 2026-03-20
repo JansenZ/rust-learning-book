@@ -1,0 +1,12 @@
+[book]
+authors = ["JansenZ"]
+language = "zh"
+multilingual = false
+src = "src"
+title = "Rust 学习小册"
+description = "一本从基础到进阶的 Rust 编程语言学习指南"
+
+[output.html]
+git-repository-url = "https://github.com/JansenZ/rust-learning-book"
+edit-url-template = "https://github.com/JansenZ/rust-learning-book/edit/main/{path}"
+site-url = "/rust-learning-book/"

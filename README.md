@@ -2,18 +2,22 @@
 
 一本从基础到进阶的 Rust 编程语言学习指南。
 
-## 📚 目录
+## 📚 在线阅读
 
-- [第 1 章：Rust 简介和安装](chapters/01-introduction.md)
-- [第 2 章：变量和数据类型](chapters/02-variables-types.md)
-- [第 3 章：所有权和借用](chapters/03-ownership-borrowing.md)
-- [第 4 章：结构体和枚举](chapters/04-structs-enums.md)
-- [第 5 章：模式匹配](chapters/05-pattern-matching.md)
-- [第 6 章：错误处理](chapters/06-error-handling.md)
-- [第 7 章：泛型和 trait](chapters/07-generics-traits.md)
-- [第 8 章：生命周期](chapters/08-lifetimes.md)
-- [第 9 章：并发编程](chapters/09-concurrency.md)
-- [第 10 章：实战项目](chapters/10-project.md)
+**[点击阅读](https://jansenz.github.io/rust-learning-book/)**
+
+## 📖 目录
+
+- [第 1 章：Rust 简介和安装](https://jansenz.github.io/rust-learning-book/ch01-introduction.html)
+- [第 2 章：变量和数据类型](https://jansenz.github.io/rust-learning-book/ch02-variables-types.html)
+- [第 3 章：所有权和借用](https://jansenz.github.io/rust-learning-book/ch03-ownership-borrowing.html)
+- [第 4 章：结构体和枚举](https://jansenz.github.io/rust-learning-book/ch04-structs-enums.html)
+- [第 5 章：模式匹配](https://jansenz.github.io/rust-learning-book/ch05-pattern-matching.html)
+- [第 6 章：错误处理](https://jansenz.github.io/rust-learning-book/ch06-error-handling.html)
+- [第 7 章：泛型和 trait](https://jansenz.github.io/rust-learning-book/ch07-generics-traits.html)
+- [第 8 章：生命周期](https://jansenz.github.io/rust-learning-book/ch08-lifetimes.html)
+- [第 9 章：并发编程](https://jansenz.github.io/rust-learning-book/ch09-concurrency.html)
+- [第 10 章：实战项目](https://jansenz.github.io/rust-learning-book/ch10-project.html)
 
 ## 🎯 适合人群
 
@@ -32,6 +36,19 @@ git clone https://github.com/JansenZ/rust-learning-book.git
 
 # 阅读章节
 cd rust-learning-book
+```
+
+## 🛠️ 本地构建
+
+```bash
+# 安装 mdBook
+cargo install mdbook
+
+# 构建静态网站
+mdbook build
+
+# 本地预览
+mdbook serve
 ```
 
 ## 📝 学习建议

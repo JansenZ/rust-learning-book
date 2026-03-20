@@ -1,0 +1,598 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>第 6 章：错误处理 - Rust 学习小册</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html" class="active"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book/edit/main/src/ch06-error-handling.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-6-章错误处理"><a class="header" href="#第-6-章错误处理">第 6 章：错误处理</a></h1>
+<h2 id="61-rust-的错误处理哲学"><a class="header" href="#61-rust-的错误处理哲学">6.1 Rust 的错误处理哲学</a></h2>
+<p>Rust 将错误分为两类：</p>
+<ol>
+<li><strong>可恢复错误</strong> - 使用 <code>Result&lt;T, E&gt;</code></li>
+<li><strong>不可恢复错误</strong> - 使用 <code>panic!</code></li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 可恢复错误：文件不存在，可以尝试其他路径
+let file = File::open("hello.txt");
+
+// 不可恢复错误：逻辑错误，无法继续
+panic!("crash and burn!");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="62-panic-宏"><a class="header" href="#62-panic-宏">6.2 panic! 宏</a></h2>
+<h3 id="触发-panic"><a class="header" href="#触发-panic">触发 panic</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    panic!("出错了！");
+    
+    // 数组越界
+    let v = vec![1, 2, 3];
+    v[99];  // panic!
+    
+    // 除零（调试模式）
+    // let x = 1 / 0;
+}</code></pre></pre>
+<h3 id="调用栈"><a class="header" href="#调用栈">调用栈</a></h3>
+<pre><code class="language-bash">$ cargo run
+thread 'main' panicked at '出错了！', src/main.rs:2:5
+stack backtrace:
+   0: std::panicking::begin_panic
+   1: my_program::main
+   ...
+</code></pre>
+<h3 id="环境变量"><a class="header" href="#环境变量">环境变量</a></h3>
+<pre><code class="language-bash"># 发布模式：panic 时直接中止（更快更小）
+RUSTFLAGS="-C panic=abort" cargo build --release
+
+# 调试模式：展开栈（默认）
+</code></pre>
+<h3 id="何时使用-panic"><a class="header" href="#何时使用-panic">何时使用 panic!</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 适合 panic 的场景：
+// 1. 示例/原型代码
+// 2. 测试代码
+// 3. 逻辑上不可能发生的情况
+// 4. 无法恢复的错误状态
+
+// ❌ 避免 panic 的场景：
+// 1. 用户输入错误
+// 2. 文件不存在
+// 3. 网络错误
+// 4. 任何预期可能失败的操作
+<span class="boring">}</span></code></pre></pre>
+<h2 id="63-result-枚举"><a class="header" href="#63-result-枚举">6.3 Result 枚举</a></h2>
+<h3 id="result-定义"><a class="header" href="#result-定义">Result 定义</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Result&lt;T, E&gt; {
+    Ok(T),   // 成功
+    Err(E),  // 错误
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    let file_result = File::open("hello.txt");
+    
+    let file = match file_result {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; panic!("打开文件失败：{:?}", error),
+    };
+}</code></pre></pre>
+<h3 id="匹配具体错误"><a class="header" href="#匹配具体错误">匹配具体错误</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let file = match File::open("hello.txt") {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; match error.kind() {
+            ErrorKind::NotFound =&gt; {
+                match File::create("hello.txt") {
+                    Ok(fc) =&gt; fc,
+                    Err(e) =&gt; panic!("创建文件失败：{:?}", e),
+                }
+            },
+            other_error =&gt; {
+                panic!("打开文件失败：{:?}", other_error)
+            },
+        },
+    };
+}</code></pre></pre>
+<h2 id="64-简化错误处理"><a class="header" href="#64-简化错误处理">6.4 简化错误处理</a></h2>
+<h3 id="unwrap"><a class="header" href="#unwrap">unwrap</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    // Ok 时返回值，Err 时 panic
+    let file = File::open("hello.txt").unwrap();
+}</code></pre></pre>
+<h3 id="expect"><a class="header" href="#expect">expect</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    // 类似 unwrap，但可自定义错误信息
+    let file = File::open("hello.txt")
+        .expect("无法打开 hello.txt");
+}</code></pre></pre>
+<h3 id="unwrap_or-和-unwrap_or_else"><a class="header" href="#unwrap_or-和-unwrap_or_else">unwrap_or 和 unwrap_or_else</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 失败时使用默认值
+    let file = File::open("hello.txt")
+        .unwrap_or(create_default_file());
+    
+    // 失败时执行闭包
+    let file = File::open("hello.txt")
+        .unwrap_or_else(|_| create_default_file());
+}</code></pre></pre>
+<h2 id="65-传播错误"><a class="header" href="#65-传播错误">6.5 传播错误</a></h2>
+<h3 id="match-传播"><a class="header" href="#match-传播">match 传播</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let file = match File::open("hello.txt") {
+        Ok(f) =&gt; f,
+        Err(e) =&gt; return Err(e),
+    };
+    
+    let mut contents = String::new();
+    match file.read_to_string(&amp;mut contents) {
+        Ok(_) =&gt; Ok(contents),
+        Err(e) =&gt; Err(e),
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="-运算符"><a class="header" href="#-运算符">? 运算符</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut file = File::open("hello.txt")?;
+    let mut contents = String::new();
+    file.read_to_string(&amp;mut contents)?;
+    Ok(contents)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="链式调用"><a class="header" href="#链式调用">链式调用</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut contents = String::new();
+    File::open("hello.txt")?
+        .read_to_string(&amp;mut contents)?;
+    Ok(contents)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="-的使用限制"><a class="header" href="#-的使用限制">? 的使用限制</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 正确：函数返回 Result
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    File::open("hello.txt")?;
+    Ok(String::new())
+}
+
+// ❌ 错误：函数返回 Option
+// fn get_first() -&gt; Option&lt;i32&gt; {
+//     let file = File::open("hello.txt")?;  // 类型不匹配
+//     Some(1)
+// }
+<span class="boring">}</span></code></pre></pre>
+<h2 id="66-错误类型转换"><a class="header" href="#66-错误类型转换">6.6 错误类型转换</a></h2>
+<h3 id="from-trait"><a class="header" href="#from-trait">From trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io;
+use std::num::ParseIntError;
+
+fn read_and_parse() -&gt; Result&lt;i32, Box&lt;dyn std::error::Error&gt;&gt; {
+    let contents = std::fs::read_to_string("number.txt")?;
+    let number: i32 = contents.trim().parse()?;
+    Ok(number)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="自定义错误类型"><a class="header" href="#自定义错误类型">自定义错误类型</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt;
+use std::error::Error;
+
+#[derive(Debug)]
+enum MyError {
+    Io(std::io::Error),
+    Parse(std::num::ParseIntError),
+    NotFound(String),
+}
+
+impl fmt::Display for MyError {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match self {
+            MyError::Io(err) =&gt; write!(f, "IO 错误：{}", err),
+            MyError::Parse(err) =&gt; write!(f, "解析错误：{}", err),
+            MyError::NotFound(path) =&gt; write!(f, "文件不存在：{}", path),
+        }
+    }
+}
+
+impl Error for MyError {}
+
+impl From&lt;std::io::Error&gt; for MyError {
+    fn from(err: std::io::Error) -&gt; MyError {
+        MyError::Io(err)
+    }
+}
+
+impl From&lt;std::num::ParseIntError&gt; for MyError {
+    fn from(err: std::num::ParseIntError) -&gt; MyError {
+        MyError::Parse(err)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="67-thiserror-和-anyhow"><a class="header" href="#67-thiserror-和-anyhow">6.7 thiserror 和 anyhow</a></h2>
+<h3 id="thiserror库开发者"><a class="header" href="#thiserror库开发者">thiserror（库开发者）</a></h3>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+thiserror = "1.0"
+</code></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum DataError {
+    #[error("数据不存在：{0}")]
+    NotFound(String),
+    
+    #[error("IO 错误")]
+    Io(#[from] std::io::Error),
+    
+    #[error("解析失败：{0}")]
+    Parse(#[from] std::num::ParseIntError),
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="anyhow应用开发者"><a class="header" href="#anyhow应用开发者">anyhow（应用开发者）</a></h3>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+anyhow = "1.0"
+</code></pre>
+<pre><pre class="playground"><code class="language-rust">use anyhow::{Context, Result};
+
+fn read_config() -&gt; Result&lt;String&gt; {
+    let path = "config.txt";
+    std::fs::read_to_string(path)
+        .with_context(|| format!("无法读取配置文件：{}", path))
+}
+
+fn main() -&gt; Result&lt;()&gt; {
+    let config = read_config()?;
+    println!("{}", config);
+    Ok(())
+}</code></pre></pre>
+<h2 id="68-实战示例"><a class="header" href="#68-实战示例">6.8 实战示例</a></h2>
+<h3 id="用户输入验证"><a class="header" href="#用户输入验证">用户输入验证</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+enum ValidationError {
+    EmptyName,
+    TooLong(String),
+    InvalidAge,
+}
+
+fn validate_user(name: &amp;str, age: u8) -&gt; Result&lt;(), ValidationError&gt; {
+    if name.is_empty() {
+        return Err(ValidationError::EmptyName);
+    }
+    
+    if name.len() &gt; 50 {
+        return Err(ValidationError::TooLong(name.to_string()));
+    }
+    
+    if age &lt; 1 || age &gt; 150 {
+        return Err(ValidationError::InvalidAge);
+    }
+    
+    Ok(())
+}
+
+fn main() {
+    match validate_user("", 25) {
+        Ok(_) =&gt; println!("验证通过"),
+        Err(e) =&gt; println!("验证失败：{:?}", e),
+    }
+}</code></pre></pre>
+<h3 id="文件操作"><a class="header" href="#文件操作">文件操作</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::{self, File};
+use std::io::{self, Write};
+
+fn save_data(filename: &amp;str, data: &amp;str) -&gt; Result&lt;(), io::Error&gt; {
+    let mut file = File::create(filename)?;
+    file.write_all(data.as_bytes())?;
+    file.sync_all()?;
+    Ok(())
+}
+
+fn load_data(filename: &amp;str) -&gt; Result&lt;String, io::Error&gt; {
+    fs::read_to_string(filename)
+}
+
+fn main() -&gt; Result&lt;(), io::Error&gt; {
+    save_data("test.txt", "Hello, Rust!")?;
+    let data = load_data("test.txt")?;
+    println!("{}", data);
+    Ok(())
+}</code></pre></pre>
+<h2 id="69-何时使用-panic"><a class="header" href="#69-何时使用-panic">6.9 何时使用 panic</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 适合 panic
+fn divide(a: i32, b: i32) -&gt; i32 {
+    if b == 0 {
+        panic!("除数不能为零");  // 调用者错误
+    }
+    a / b
+}
+
+// ✅ 适合 panic
+fn get_first(v: &amp;[i32]) -&gt; i32 {
+    *v.first().expect("切片不能为空")  // 逻辑错误
+}
+
+// ❌ 应该用 Result
+fn parse_number(s: &amp;str) -&gt; Result&lt;i32, std::num::ParseIntError&gt; {
+    s.parse()  // 用户输入，预期可能失败
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="610-练习题"><a class="header" href="#610-练习题">6.10 练习题</a></h2>
+<ol>
+<li>编写函数，读取文件并返回行数，使用 ? 运算符</li>
+<li>创建自定义错误类型处理用户注册验证</li>
+<li>使用 anyhow 简化错误处理</li>
+<li>实现一个安全的除法函数，返回 Result</li>
+</ol>
+<h2 id="611-小结"><a class="header" href="#611-小结">6.11 小结</a></h2>
+<ul>
+<li>使用 <code>panic!</code> 处理不可恢复错误</li>
+<li>使用 <code>Result&lt;T, E&gt;</code> 处理可恢复错误</li>
+<li><code>?</code> 运算符简化错误传播</li>
+<li>库代码使用具体错误类型，应用代码可用 anyhow</li>
+<li>thiserror 简化自定义错误定义</li>
+<li>始终优先使用 Result 而非 panic</li>
+</ul>
+<hr />
+<p><a href="05-pattern-matching.html">上一章：模式匹配 ←</a> | <a href="07-generics-traits.html">下一章：泛型和 trait →</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch05-pattern-matching.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch07-generics-traits.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch05-pattern-matching.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch07-generics-traits.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

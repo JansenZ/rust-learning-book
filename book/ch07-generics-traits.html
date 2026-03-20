@@ -1,0 +1,627 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>第 7 章：泛型和 trait - Rust 学习小册</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html" class="active"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book/edit/main/src/ch07-generics-traits.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-7-章泛型和-trait"><a class="header" href="#第-7-章泛型和-trait">第 7 章：泛型和 trait</a></h1>
+<h2 id="71-泛型generics"><a class="header" href="#71-泛型generics">7.1 泛型（Generics）</a></h2>
+<h3 id="函数中的泛型"><a class="header" href="#函数中的泛型">函数中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">// 泛型函数
+fn largest&lt;T: PartialOrd&gt;(list: &amp;[T]) -&gt; &amp;T {
+    let mut largest = &amp;list[0];
+    
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+    
+    largest
+}
+
+fn main() {
+    let numbers = vec![34, 50, 25, 100, 65];
+    println!("最大数字：{}", largest(&amp;numbers));
+    
+    let chars = vec!['y', 'm', 'a', 'q'];
+    println!("最大字符：{}", largest(&amp;chars));
+}</code></pre></pre>
+<h3 id="结构体中的泛型"><a class="header" href="#结构体中的泛型">结构体中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}</code></pre></pre>
+<h3 id="多个泛型参数"><a class="header" href="#多个泛型参数">多个泛型参数</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T, U&gt; {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10.0 };  // T=i32, U=f64
+}</code></pre></pre>
+<h3 id="枚举中的泛型"><a class="header" href="#枚举中的泛型">枚举中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+
+fn main() {
+    let some_number: Option&lt;i32&gt; = Some(5);
+    let some_char: Option&lt;char&gt; = Some('a');
+    
+    let ok: Result&lt;i32, &amp;str&gt; = Ok(5);
+    let err: Result&lt;i32, &amp;str&gt; = Err("错误");
+}</code></pre></pre>
+<h3 id="方法实现"><a class="header" href="#方法实现">方法实现</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn x(&amp;self) -&gt; &amp;T {
+        &amp;self.x
+    }
+    
+    fn y(&amp;self) -&gt; &amp;T {
+        &amp;self.y
+    }
+}
+
+// 特定类型的实现
+impl Point&lt;f32&gt; {
+    fn distance_from_origin(&amp;self) -&gt; f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+fn main() {
+    let p = Point { x: 3.0, y: 4.0 };
+    println!("x = {}", p.x());
+    println!("距离原点：{}", p.distance_from_origin());
+}</code></pre></pre>
+<h2 id="72-trait"><a class="header" href="#72-trait">7.2 Trait</a></h2>
+<h3 id="定义-trait"><a class="header" href="#定义-trait">定义 Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+    
+    // 默认实现
+    fn summary(&amp;self) -&gt; String {
+        String::from("(更多内容...)")
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="实现-trait"><a class="header" href="#实现-trait">实现 Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust">pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}, by {} ({})", 
+                self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+}
+
+impl Summary for Tweet {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+fn main() {
+    let tweet = Tweet {
+        username: String::from("rustlang"),
+        content: String::from("Rust 很棒！"),
+    };
+    
+    println!("推文：{}", tweet.summarize());
+}</code></pre></pre>
+<h3 id="trait-作为参数"><a class="header" href="#trait-作为参数">Trait 作为参数</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn notify(item: &amp;impl Summary) {
+    println!("通知：{}", item.summarize());
+}
+
+// 等价于
+pub fn notify&lt;T: Summary&gt;(item: &amp;T) {
+    println!("通知：{}", item.summarize());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个-trait-约束"><a class="header" href="#多个-trait-约束">多个 Trait 约束</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// impl Trait 语法
+pub fn notify(item: &amp;(impl Summary + Display)) { }
+
+// 泛型语法
+pub fn notify&lt;T: Summary + Display&gt;(item: &amp;T) { }
+
+// where 子句（更清晰）
+pub fn notify&lt;T&gt;(item: &amp;T) 
+where 
+    T: Summary + Display 
+{
+    println!("通知：{}", item.summarize());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="返回实现-trait-的类型"><a class="header" href="#返回实现-trait-的类型">返回实现 Trait 的类型</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn returns_summary() -&gt; impl Summary {
+    Tweet {
+        username: String::from("rustlang"),
+        content: String::from("Rust 很棒！"),
+    }
+}
+
+// 注意：只能返回单一类型
+// 不能有时返回 Tweet，有时返回 NewsArticle
+<span class="boring">}</span></code></pre></pre>
+<h3 id="条件实现"><a class="header" href="#条件实现">条件实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;T: Display&gt; Summary for Pair&lt;T&gt; {
+    fn summarize(&amp;self) -&gt; String {
+        format!("({}, {})", self.x, self.y)
+    }
+}
+
+// 仅当 T 和 U 都实现 PartialOrd 时
+impl&lt;T: PartialOrd + Display, U: PartialOrd + Display&gt; 
+    Pair&lt;T, U&gt; 
+{
+    fn cmp_display(&amp;self) {
+        if self.x &gt;= self.y {
+            println!("最大是 x = {}", self.x);
+        } else {
+            println!("最大是 y = {}", self.y);
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="73-常用标准库-trait"><a class="header" href="#73-常用标准库-trait">7.3 常用标准库 Trait</a></h2>
+<h3 id="display-和-debug"><a class="header" href="#display-和-debug">Display 和 Debug</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fmt;
+
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+// Debug: 调试输出 {:?}
+impl fmt::Debug for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        write!(f, "Point {{ x: {}, y: {} }}", self.x, self.y)
+    }
+}
+
+// Display: 用户友好输出 {}
+impl fmt::Display for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+fn main() {
+    let p = Point { x: 10, y: 20 };
+    println!("{:?}", p);  // Debug
+    println!("{}", p);    // Display
+}</code></pre></pre>
+<h3 id="clone-和-copy"><a class="header" href="#clone-和-copy">Clone 和 Copy</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Clone, Debug)]
+struct Person {
+    name: String,
+    age: u32,
+}
+
+fn main() {
+    let p1 = Person {
+        name: String::from("Alice"),
+        age: 30,
+    };
+    
+    let p2 = p1.clone();  // 深拷贝
+    
+    println!("{:?}", p1);
+    println!("{:?}", p2);
+}</code></pre></pre>
+<h3 id="partialeq-和-eq"><a class="header" href="#partialeq-和-eq">PartialEq 和 Eq</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(PartialEq, Eq, Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+    let rect2 = Rectangle { width: 30, height: 50 };
+    
+    println!("相等：{}", rect1 == rect2);
+}</code></pre></pre>
+<h3 id="default"><a class="header" href="#default">Default</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Default, Debug)]
+struct User {
+    username: String,
+    active: bool,
+}
+
+fn main() {
+    let user = User::default();
+    println!("{:?}", user);
+}</code></pre></pre>
+<h2 id="74-trait-对象"><a class="header" href="#74-trait-对象">7.4 Trait 对象</a></h2>
+<h3 id="动态分发"><a class="header" href="#动态分发">动态分发</a></h3>
+<pre><pre class="playground"><code class="language-rust">trait Draw {
+    fn draw(&amp;self);
+}
+
+struct Button {
+    label: String,
+}
+
+impl Draw for Button {
+    fn draw(&amp;self) {
+        println!("绘制按钮：{}", self.label);
+    }
+}
+
+struct TextField {
+    content: String,
+}
+
+impl Draw for TextField {
+    fn draw(&amp;self) {
+        println!("绘制文本框：{}", self.content);
+    }
+}
+
+// Trait 对象
+fn draw_screen(components: &amp;[&amp;dyn Draw]) {
+    for component in components {
+        component.draw();
+    }
+}
+
+fn main() {
+    let button = Button { label: String::from("确定") };
+    let text = TextField { content: String::from("输入...") };
+    
+    let components: Vec&lt;&amp;dyn Draw&gt; = vec![&amp;button, &amp;text];
+    draw_screen(&amp;components);
+}</code></pre></pre>
+<h3 id="box"><a class="header" href="#box">Box<dyn Trait></a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 存储不同类型的 Trait 对象
+    let components: Vec&lt;Box&lt;dyn Draw&gt;&gt; = vec![
+        Box::new(Button { label: String::from("确定") }),
+        Box::new(TextField { content: String::from("输入") }),
+    ];
+    
+    for component in components {
+        component.draw();
+    }
+}</code></pre></pre>
+<h2 id="75-实战示例"><a class="header" href="#75-实战示例">7.5 实战示例</a></h2>
+<h3 id="通用容器"><a class="header" href="#通用容器">通用容器</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Stack&lt;T&gt; {
+    items: Vec&lt;T&gt;,
+}
+
+impl&lt;T&gt; Stack&lt;T&gt; {
+    fn new() -&gt; Self {
+        Stack { items: Vec::new() }
+    }
+    
+    fn push(&amp;mut self, item: T) {
+        self.items.push(item);
+    }
+    
+    fn pop(&amp;mut self) -&gt; Option&lt;T&gt; {
+        self.items.pop()
+    }
+    
+    fn is_empty(&amp;self) -&gt; bool {
+        self.items.is_empty()
+    }
+}
+
+fn main() {
+    let mut int_stack = Stack::new();
+    int_stack.push(1);
+    int_stack.push(2);
+    
+    let mut string_stack = Stack::new();
+    string_stack.push(String::from("hello"));
+}</code></pre></pre>
+<h3 id="可比较类型"><a class="header" href="#可比较类型">可比较类型</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn find_max&lt;T: PartialOrd + Copy&gt;(slice: &amp;[T]) -&gt; Option&lt;T&gt; {
+    if slice.is_empty() {
+        return None;
+    }
+    
+    let mut max = slice[0];
+    for &amp;item in slice.iter() {
+        if item &gt; max {
+            max = item;
+        }
+    }
+    
+    Some(max)
+}
+
+fn main() {
+    let numbers = [3, 7, 2, 9, 1];
+    println!("最大值：{:?}", find_max(&amp;numbers));
+    
+    let chars = ['a', 'z', 'm'];
+    println!("最大字符：{:?}", find_max(&amp;chars));
+}</code></pre></pre>
+<h2 id="76-练习题"><a class="header" href="#76-练习题">7.6 练习题</a></h2>
+<ol>
+<li>创建一个泛型函数，交换两个值的位置</li>
+<li>为自定义类型实现 Display trait</li>
+<li>使用 Trait 对象创建图形渲染系统</li>
+<li>实现一个泛型的链表结构</li>
+</ol>
+<h2 id="77-小结"><a class="header" href="#77-小结">7.7 小结</a></h2>
+<ul>
+<li>泛型允许编写适用于多种类型的代码</li>
+<li>Trait 定义共享行为</li>
+<li>impl Trait 简化函数签名</li>
+<li>where 子句使复杂约束更清晰</li>
+<li>Trait 对象实现运行时多态</li>
+<li>标准库提供常用 Trait：Display, Debug, Clone, Copy 等</li>
+</ul>
+<hr />
+<p><a href="06-error-handling.html">上一章：错误处理 ←</a> | <a href="08-lifetimes.html">下一章：生命周期 →</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch06-error-handling.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch08-lifetimes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch06-error-handling.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch08-lifetimes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

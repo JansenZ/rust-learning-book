@@ -1,0 +1,780 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>第 10 章：实战项目 - Rust 学习小册</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html" class="active"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book/edit/main/src/ch10-project.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-10-章实战项目"><a class="header" href="#第-10-章实战项目">第 10 章：实战项目</a></h1>
+<h2 id="101-项目一命令行工具"><a class="header" href="#101-项目一命令行工具">10.1 项目一：命令行工具</a></h2>
+<h3 id="grep-实现"><a class="header" href="#grep-实现">grep 实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[package]
+name = "minigrep"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use std::env;
+use std::fs;
+use std::process;
+
+struct Config {
+    query: String,
+    filename: String,
+    case_sensitive: bool,
+}
+
+impl Config {
+    fn new(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+        if args.len() &lt; 3 {
+            return Err("参数不足");
+        }
+        
+        let query = args[1].clone();
+        let filename = args[2].clone();
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+        
+        Ok(Config {
+            query,
+            filename,
+            case_sensitive,
+        })
+    }
+}
+
+fn run(config: Config) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let contents = fs::read_to_string(&amp;config.filename)?;
+    
+    let results = if config.case_sensitive {
+        search(&amp;config.query, &amp;contents)
+    } else {
+        search_case_insensitive(&amp;config.query, &amp;contents)
+    };
+    
+    for line in results {
+        println!("{}", line);
+    }
+    
+    Ok(())
+}
+
+fn search&lt;'a&gt;(query: &amp;str, contents: &amp;'a str) -&gt; Vec&lt;&amp;'a str&gt; {
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
+}
+
+fn search_case_insensitive&lt;'a&gt;(
+    query: &amp;str,
+    contents: &amp;'a str,
+) -&gt; Vec&lt;&amp;'a str&gt; {
+    let query = query.to_lowercase();
+    
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&amp;query))
+        .collect()
+}
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    
+    let config = Config::new(&amp;args).unwrap_or_else(|err| {
+        eprintln!("参数错误：{}", err);
+        process::exit(1);
+    });
+    
+    if let Err(e) = run(config) {
+        eprintln!("程序错误：{}", e);
+        process::exit(1);
+    }
+}</code></pre></pre>
+<h3 id="使用示例"><a class="header" href="#使用示例">使用示例</a></h3>
+<pre><code class="language-bash">$ cargo run -- to search poem.txt
+在诗中寻找 "to"
+
+$ CASE_INSENSITIVE=1 cargo run -- to search poem.txt
+不区分大小写搜索
+</code></pre>
+<h2 id="102-项目二web-服务器"><a class="header" href="#102-项目二web-服务器">10.2 项目二：Web 服务器</a></h2>
+<h3 id="基础服务器"><a class="header" href="#基础服务器">基础服务器</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[package]
+name = "web_server"
+version = "0.1.0"
+edition = "2021"
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use std::fs;
+use std::io::{prelude::*, BufReader};
+use std::net::{TcpListener, TcpStream};
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    
+    println!("服务器运行在 http://127.0.0.1:7878");
+    
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+        
+        thread::spawn(|| {
+            handle_connection(stream);
+        });
+    }
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    let buf_reader = BufReader::new(&amp;mut stream);
+    let http_request: Vec&lt;_&gt; = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+    
+    let (status_line, filename) = match &amp;http_request[..] {
+        ["GET /", ..] =&gt; ("HTTP/1.1 200 OK", "hello.html"),
+        ["GET /sleep", ..] =&gt; {
+            thread::sleep(Duration::from_secs(5));
+            ("HTTP/1.1 200 OK", "hello.html")
+        },
+        _ =&gt; ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    };
+    
+    let contents = fs::read_to_string(filename).unwrap_or_default();
+    
+    let response = format!(
+        "{}\r\nContent-Length: {}\r\n\r\n{}",
+        status_line,
+        contents.len(),
+        contents
+    );
+    
+    stream.write_all(response.as_bytes()).unwrap();
+}</code></pre></pre>
+<h3 id="线程池版本"><a class="header" href="#线程池版本">线程池版本</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+pub struct ThreadPool {
+    workers: Vec&lt;Worker&gt;,
+    sender: Option&lt;mpsc::Sender&lt;Job&gt;&gt;,
+}
+
+type Job = Box&lt;dyn FnOnce() + Send + 'static&gt;;
+
+impl ThreadPool {
+    pub fn new(size: usize) -&gt; ThreadPool {
+        assert!(size &gt; 0);
+        
+        let (sender, receiver) = mpsc::channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+        
+        let mut workers = Vec::with_capacity(size);
+        
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&amp;receiver)));
+        }
+        
+        ThreadPool {
+            workers,
+            sender: Some(sender),
+        }
+    }
+    
+    pub fn execute&lt;F&gt;(&amp;self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let job = Box::new(f);
+        self.sender.as_ref().unwrap().send(job).unwrap();
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        drop(self.sender.take());
+        
+        for worker in &amp;mut self.workers {
+            println!("关闭 Worker {}", worker.id);
+            
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="103-项目三待办事项-cli"><a class="header" href="#103-项目三待办事项-cli">10.3 项目三：待办事项 CLI</a></h2>
+<h3 id="数据结构"><a class="header" href="#数据结构">数据结构</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+use serde::{Deserialize, Serialize};
+use std::fs;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Todo {
+    id: u64,
+    title: String,
+    completed: bool,
+}
+
+#[derive(Default)]
+pub struct TodoList {
+    todos: Vec&lt;Todo&gt;,
+    next_id: u64,
+}
+
+impl TodoList {
+    pub fn new() -&gt; Self {
+        TodoList {
+            todos: Vec::new(),
+            next_id: 1,
+        }
+    }
+    
+    pub fn load(path: &amp;str) -&gt; Result&lt;Self, Box&lt;dyn std::error::Error&gt;&gt; {
+        let contents = fs::read_to_string(path)?;
+        let todos: Vec&lt;Todo&gt; = serde_json::from_str(&amp;contents)?;
+        let next_id = todos.iter().map(|t| t.id).max().unwrap_or(0) + 1;
+        
+        Ok(TodoList { todos, next_id })
+    }
+    
+    pub fn save(&amp;self, path: &amp;str) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+        let contents = serde_json::to_string_pretty(&amp;self.todos)?;
+        fs::write(path, contents)?;
+        Ok(())
+    }
+    
+    pub fn add(&amp;mut self, title: String) -&gt; &amp;Todo {
+        let todo = Todo {
+            id: self.next_id,
+            title,
+            completed: false,
+        };
+        self.next_id += 1;
+        self.todos.push(todo);
+        self.todos.last().unwrap()
+    }
+    
+    pub fn complete(&amp;mut self, id: u64) -&gt; Option&lt;&amp;Todo&gt; {
+        self.todos
+            .iter_mut()
+            .find(|t| t.id == id)
+            .map(|t| {
+                t.completed = true;
+                t
+            })
+    }
+    
+    pub fn list(&amp;self) -&gt; &amp;[Todo] {
+        &amp;self.todos
+    }
+    
+    pub fn remove(&amp;mut self, id: u64) -&gt; Option&lt;Todo&gt; {
+        if let Some(pos) = self.todos.iter().position(|t| t.id == id) {
+            Some(self.todos.remove(pos))
+        } else {
+            None
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="命令行界面"><a class="header" href="#命令行界面">命令行界面</a></h3>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use todo_lib::TodoList;
+use std::env;
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    let mut todo_list = TodoList::load("todos.json")
+        .unwrap_or_else(|_| TodoList::new());
+    
+    match args.get(1).map(|s| s.as_str()) {
+        Some("add") =&gt; {
+            let title = args.get(2).unwrap_or_else(|| {
+                eprintln!("请提供标题");
+                std::process::exit(1);
+            });
+            let todo = todo_list.add(title.clone());
+            println!("添加：{} (ID: {})", todo.title, todo.id);
+        },
+        Some("list") =&gt; {
+            for todo in todo_list.list() {
+                let status = if todo.completed { "✓" } else { " " };
+                println!("[{}] {}: {}", status, todo.id, todo.title);
+            }
+        },
+        Some("complete") =&gt; {
+            let id: u64 = args.get(2)
+                .and_then(|s| s.parse().ok())
+                .unwrap_or_else(|| {
+                    eprintln!("请提供有效的 ID");
+                    std::process::exit(1);
+                });
+            
+            if let Some(todo) = todo_list.complete(id) {
+                println!("完成：{}", todo.title);
+            } else {
+                eprintln!("未找到 ID: {}", id);
+            }
+        },
+        Some("remove") =&gt; {
+            let id: u64 = args.get(2)
+                .and_then(|s| s.parse().ok())
+                .unwrap_or_else(|| {
+                    eprintln!("请提供有效的 ID");
+                    std::process::exit(1);
+                });
+            
+            if let Some(todo) = todo_list.remove(id) {
+                println!("移除：{}", todo.title);
+            } else {
+                eprintln!("未找到 ID: {}", id);
+            }
+        },
+        _ =&gt; {
+            eprintln!("用法:");
+            eprintln!("  todo add &lt;标题&gt;     添加待办");
+            eprintln!("  todo list           列出待办");
+            eprintln!("  todo complete &lt;ID&gt;  完成待办");
+            eprintln!("  todo remove &lt;ID&gt;    删除待办");
+        },
+    }
+    
+    todo_list.save("todos.json").unwrap();
+}</code></pre></pre>
+<h3 id="使用示例-1"><a class="header" href="#使用示例-1">使用示例</a></h3>
+<pre><code class="language-bash">$ cargo run -- add "学习 Rust"
+添加：学习 Rust (ID: 1)
+
+$ cargo run -- add "写代码"
+添加：写代码 (ID: 2)
+
+$ cargo run -- list
+[ ] 1: 学习 Rust
+[ ] 2: 写代码
+
+$ cargo run -- complete 1
+完成：学习 Rust
+
+$ cargo run -- list
+[✓] 1: 学习 Rust
+[ ] 2: 写代码
+</code></pre>
+<h2 id="104-项目四api-客户端"><a class="header" href="#104-项目四api-客户端">10.4 项目四：API 客户端</a></h2>
+<h3 id="http-客户端"><a class="header" href="#http-客户端">HTTP 客户端</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use reqwest::blocking::Client;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Post {
+    userId: u32,
+    id: Option&lt;u32&gt;,
+    title: String,
+    body: String,
+}
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let client = Client::new();
+    
+    // GET 请求
+    let response = client
+        .get("https://jsonplaceholder.typicode.com/posts/1")
+        .send()?;
+    
+    let post: Post = response.json()?;
+    println!("获取帖子：{:?}", post);
+    
+    // POST 请求
+    let new_post = Post {
+        userId: 1,
+        id: None,
+        title: "我的帖子".to_string(),
+        body: "这是内容".to_string(),
+    };
+    
+    let response = client
+        .post("https://jsonplaceholder.typicode.com/posts")
+        .json(&amp;new_post)
+        .send()?;
+    
+    let created: Post = response.json()?;
+    println!("创建帖子：{:?}", created);
+    
+    Ok(())
+}</code></pre></pre>
+<h2 id="105-项目五文件处理器"><a class="header" href="#105-项目五文件处理器">10.5 项目五：文件处理器</a></h2>
+<h3 id="并行文件处理"><a class="header" href="#并行文件处理">并行文件处理</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs;
+use std::io::{self, BufRead, Write};
+use std::path::Path;
+use std::thread;
+
+fn process_file(path: &amp;str) -&gt; io::Result&lt;usize&gt; {
+    let file = fs::File::open(path)?;
+    let reader = io::BufReader::new(file);
+    
+    let mut line_count = 0;
+    for line in reader.lines() {
+        let _ = line?;
+        line_count += 1;
+    }
+    
+    Ok(line_count)
+}
+
+fn parallel_process(paths: Vec&lt;String&gt;) -&gt; Vec&lt;io::Result&lt;usize&gt;&gt; {
+    let mut handles = vec![];
+    
+    for path in paths {
+        let handle = thread::spawn(move || {
+            process_file(&amp;path)
+        });
+        handles.push(handle);
+    }
+    
+    handles.into_iter()
+        .map(|h| h.join().unwrap())
+        .collect()
+}
+
+fn main() -&gt; io::Result&lt;()&gt; {
+    let files = vec![
+        "file1.txt".to_string(),
+        "file2.txt".to_string(),
+        "file3.txt".to_string(),
+    ];
+    
+    let results = parallel_process(files);
+    
+    for (i, result) in results.iter().enumerate() {
+        match result {
+            Ok(count) =&gt; println!("文件 {}: {} 行", i + 1, count),
+            Err(e) =&gt; println!("文件 {} 错误：{}", i + 1, e),
+        }
+    }
+    
+    Ok(())
+}</code></pre></pre>
+<h2 id="106-最佳实践"><a class="header" href="#106-最佳实践">10.6 最佳实践</a></h2>
+<h3 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h3>
+<pre><code>my_project/
+├── Cargo.toml
+├── Cargo.lock
+├── src/
+│   ├── main.rs      # 程序入口
+│   ├── lib.rs       # 库代码
+│   ├── bin/         # 多个二进制文件
+│   ├── modules/     # 模块
+│   └── utils.rs     # 工具函数
+├── tests/           # 集成测试
+├── benches/         # 基准测试
+└── examples/        # 示例代码
+</code></pre>
+<h3 id="代码组织"><a class="header" href="#代码组织">代码组织</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 良好的模块结构
+mod config;
+mod database;
+mod handlers;
+mod models;
+mod utils;
+
+use config::Config;
+use database::Database;
+use handlers::RequestHandler;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="测试"><a class="header" href="#测试">测试</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_add() {
+        let mut list = TodoList::new();
+        let todo = list.add("test".to_string());
+        assert_eq!(todo.title, "test");
+        assert!(!todo.completed);
+    }
+    
+    #[test]
+    fn test_complete() {
+        let mut list = TodoList::new();
+        list.add("test".to_string());
+        list.complete(1);
+        assert!(list.list()[0].completed);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="107-下一步"><a class="header" href="#107-下一步">10.7 下一步</a></h2>
+<h3 id="进阶主题"><a class="header" href="#进阶主题">进阶主题</a></h3>
+<ul>
+<li>异步编程（async/await）</li>
+<li>宏编程（macro）</li>
+<li>FFI（与其他语言交互）</li>
+<li>性能优化</li>
+<li>嵌入式 Rust</li>
+</ul>
+<h3 id="学习资源"><a class="header" href="#学习资源">学习资源</a></h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://github.com/rust-lang/rustlings">Rustlings</a></li>
+<li><a href="https://www.arewewebyet.org/">Are we web yet?</a></li>
+</ul>
+<h2 id="108-总结"><a class="header" href="#108-总结">10.8 总结</a></h2>
+<p>恭喜你完成了 Rust 学习小册！你已经掌握了：</p>
+<ul>
+<li>✅ Rust 基础语法和所有权系统</li>
+<li>✅ 结构体、枚举和模式匹配</li>
+<li>✅ 错误处理和泛型</li>
+<li>✅ 生命周期和并发编程</li>
+<li>✅ 实际项目开发</li>
+</ul>
+<p>继续实践，参与开源项目，Rust 社区欢迎你！🦀</p>
+<hr />
+<p><a href="09-concurrency.html">上一章：并发编程 ←</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch09-concurrency.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch09-concurrency.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,3616 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust 学习小册</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-1-章rust-简介和安装"><a class="header" href="#第-1-章rust-简介和安装">第 1 章：Rust 简介和安装</a></h1>
+<h2 id="11-什么是-rust"><a class="header" href="#11-什么是-rust">1.1 什么是 Rust？</a></h2>
+<p>Rust 是一门系统编程语言，专注于<strong>安全</strong>、<strong>并发</strong>和<strong>性能</strong>。它由 Mozilla 研究团队开发，第一个稳定版本于 2015 年发布。</p>
+<h3 id="rust-的核心特点"><a class="header" href="#rust-的核心特点">Rust 的核心特点</a></h3>
+<ul>
+<li><strong>内存安全</strong>：无需垃圾回收器，通过所有权系统保证内存安全</li>
+<li><strong>零成本抽象</strong>：高级特性不会带来运行时开销</li>
+<li><strong>并发安全</strong>：编译时防止数据竞争</li>
+<li><strong>丰富的类型系统</strong>：强大的类型推断和模式匹配</li>
+</ul>
+<h3 id="为什么选择-rust"><a class="header" href="#为什么选择-rust">为什么选择 Rust？</a></h3>
+<pre><code>🔒 内存安全 - 消除空指针、悬垂指针、缓冲区溢出
+⚡ 高性能 - 与 C/C++ 相当的执行速度
+🛠️ 优秀工具链 - Cargo 包管理器、rustfmt、clippy
+📚 友好社区 - 完善的文档和活跃的社区支持
+</code></pre>
+<h2 id="12-安装-rust"><a class="header" href="#12-安装-rust">1.2 安装 Rust</a></h2>
+<h3 id="macos--linux"><a class="header" href="#macos--linux">macOS / Linux</a></h3>
+<pre><code class="language-bash"># 使用 rustup 安装（推荐）
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# 安装完成后，重启终端或运行：
+source $HOME/.cargo/env
+
+# 验证安装
+rustc --version
+cargo --version
+</code></pre>
+<h3 id="windows"><a class="header" href="#windows">Windows</a></h3>
+<ol>
+<li>访问 https://rustup.rs/</li>
+<li>下载 <code>rustup-init.exe</code></li>
+<li>运行安装程序，按提示操作</li>
+</ol>
+<h3 id="验证安装"><a class="header" href="#验证安装">验证安装</a></h3>
+<pre><code class="language-bash">$ rustc --version
+rustc 1.75.0 (82e1608df 2023-12-21)
+
+$ cargo --version
+cargo 1.75.0 (1d8b05cdd 2023-11-20)
+</code></pre>
+<h2 id="13-更新和卸载"><a class="header" href="#13-更新和卸载">1.3 更新和卸载</a></h2>
+<pre><code class="language-bash"># 更新 Rust
+rustup update
+
+# 更新到特定版本
+rustup update stable
+rustup update nightly
+
+# 卸载 Rust
+rustup self uninstall
+</code></pre>
+<h2 id="14-配置开发环境"><a class="header" href="#14-配置开发环境">1.4 配置开发环境</a></h2>
+<h3 id="编辑器推荐"><a class="header" href="#编辑器推荐">编辑器推荐</a></h3>
+<ul>
+<li><strong>VS Code</strong> + rust-analyzer 插件（最流行）</li>
+<li><strong>IntelliJ IDEA</strong> + Rust 插件</li>
+<li><strong>Neovim</strong> + rust.vim</li>
+</ul>
+<h3 id="vs-code-配置"><a class="header" href="#vs-code-配置">VS Code 配置</a></h3>
+<ol>
+<li>安装 Rust 官方插件：<code>rust-analyzer</code></li>
+<li>可选插件：
+<ul>
+<li><code>crates</code> - 依赖版本检查</li>
+<li><code>Better TOML</code> - TOML 文件支持</li>
+</ul>
+</li>
+</ol>
+<h3 id="常用-cargo-命令"><a class="header" href="#常用-cargo-命令">常用 Cargo 命令</a></h3>
+<pre><code class="language-bash"># 创建新项目
+cargo new my_project
+cargo new --lib my_library
+
+# 编译项目
+cargo build
+cargo build --release  # 优化编译
+
+# 运行项目
+cargo run
+
+# 运行测试
+cargo test
+
+# 格式化代码
+cargo fmt
+
+# 代码检查
+cargo clippy
+
+# 查看依赖
+cargo tree
+</code></pre>
+<h2 id="15-第一个-rust-程序"><a class="header" href="#15-第一个-rust-程序">1.5 第一个 Rust 程序</a></h2>
+<pre><code class="language-bash"># 创建新项目
+cargo new hello_rust
+cd hello_rust
+</code></pre>
+<p>编辑 <code>src/main.rs</code>：</p>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    println!("Hello, Rust!");
+    println!("🦀 欢迎学习 Rust！");
+}</code></pre></pre>
+<p>运行程序：</p>
+<pre><code class="language-bash">$ cargo run
+   Compiling hello_rust v0.1.0
+    Finished dev [unoptimized + debuginfo] target(s)
+     Running `target/debug/hello_rust`
+Hello, Rust!
+🦀 欢迎学习 Rust！
+</code></pre>
+<h2 id="16-项目结构"><a class="header" href="#16-项目结构">1.6 项目结构</a></h2>
+<pre><code>hello_rust/
+├── Cargo.toml      # 项目配置和依赖
+├── Cargo.lock      # 依赖锁定文件
+├── src/
+│   └── main.rs     # 源代码
+└── target/         # 编译输出（自动生成）
+</code></pre>
+<h3 id="cargotoml-示例"><a class="header" href="#cargotoml-示例">Cargo.toml 示例</a></h3>
+<pre><code class="language-toml">[package]
+name = "hello_rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 在这里添加依赖
+</code></pre>
+<h2 id="17-练习题"><a class="header" href="#17-练习题">1.7 练习题</a></h2>
+<ol>
+<li>安装 Rust 并验证版本</li>
+<li>创建一个新的 Cargo 项目</li>
+<li>修改程序输出你的名字</li>
+<li>尝试使用 <code>cargo build --release</code> 编译优化版本</li>
+</ol>
+<h2 id="18-小结"><a class="header" href="#18-小结">1.8 小结</a></h2>
+<ul>
+<li>Rust 是安全、并发、高性能的系统编程语言</li>
+<li>使用 rustup 安装 Rust 是最简单的方式</li>
+<li>Cargo 是 Rust 的包管理器和构建工具</li>
+<li><code>cargo new</code> 创建项目，<code>cargo run</code> 运行项目</li>
+</ul>
+<hr />
+<p><a href="02-variables-types.html">下一章：变量和数据类型 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-2-章变量和数据类型"><a class="header" href="#第-2-章变量和数据类型">第 2 章：变量和数据类型</a></h1>
+<h2 id="21-变量声明"><a class="header" href="#21-变量声明">2.1 变量声明</a></h2>
+<h3 id="不可变变量默认"><a class="header" href="#不可变变量默认">不可变变量（默认）</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;      // 类型推断为 i32
+    let y: i32 = 10; // 显式声明类型
+    
+    println!("x = {}, y = {}", x, y);
+    
+    // x = 6;  // 错误！不能重新赋值
+}</code></pre></pre>
+<h3 id="可变变量"><a class="header" href="#可变变量">可变变量</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut counter = 0;
+    
+    counter += 1;
+    counter += 2;
+    
+    println!("counter = {}", counter);  // 输出：3
+}</code></pre></pre>
+<h3 id="常量"><a class="header" href="#常量">常量</a></h3>
+<pre><pre class="playground"><code class="language-rust">const MAX_POINTS: u32 = 100_000;  // 必须标注类型
+const PI: f64 = 3.14159;
+
+fn main() {
+    println!("MAX_POINTS = {}", MAX_POINTS);
+}</code></pre></pre>
+<h3 id="变量遮蔽shadowing"><a class="header" href="#变量遮蔽shadowing">变量遮蔽（Shadowing）</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;
+    let x = x + 1;  // 遮蔽之前的 x
+    let x = x * 2;
+    
+    println!("x = {}", x);  // 输出：12
+    
+    // 遮蔽可以改变类型
+    let spaces = "   ";
+    let spaces = spaces.len();  // &amp;str -&gt; usize
+}</code></pre></pre>
+<h2 id="22-基本数据类型"><a class="header" href="#22-基本数据类型">2.2 基本数据类型</a></h2>
+<h3 id="整数类型"><a class="header" href="#整数类型">整数类型</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>类型</th><th>大小</th><th>范围</th></tr></thead><tbody>
+<tr><td>i8</td><td>8-bit</td><td>-128 to 127</td></tr>
+<tr><td>i16</td><td>16-bit</td><td>-32,768 to 32,767</td></tr>
+<tr><td>i32</td><td>32-bit</td><td>-2,147,483,648 to 2,147,483,647</td></tr>
+<tr><td>i64</td><td>64-bit</td><td>约 ±9×10¹⁸</td></tr>
+<tr><td>i128</td><td>128-bit</td><td>约 ±1×10³⁸</td></tr>
+<tr><td>isize/usize</td><td>指针大小</td><td>依赖架构</td></tr>
+</tbody></table>
+</div>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let a: i32 = 42;
+    let b: u64 = 100;
+    let c: isize = -50;
+    
+    // 数字字面量
+    let decimal = 99_220;      // 99220
+    let hex = 0xff;            // 255
+    let octal = 0o77;          // 63
+    let binary = 0b1111_0000;  // 240
+    let byte = b'A';           // 65 (u8)
+}</code></pre></pre>
+<h3 id="浮点类型"><a class="header" href="#浮点类型">浮点类型</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = 2.0;              // f64 (默认)
+    let y: f32 = 3.0;         // f32
+    
+    println!("x = {}, y = {}", x, y);
+}</code></pre></pre>
+<h3 id="布尔类型"><a class="header" href="#布尔类型">布尔类型</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let t = true;
+    let f: bool = false;
+    
+    let is_rust_fun = true;
+}</code></pre></pre>
+<h3 id="字符类型"><a class="header" href="#字符类型">字符类型</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let c = 'z';
+    let heart = '❤️';
+    let japanese = 'あ';
+    
+    println!("c = {}, heart = {}", c, heart);
+    
+    // char 是 4 字节的 Unicode 标量值
+    println!("size of char: {} bytes", std::mem::size_of::&lt;char&gt;());
+}</code></pre></pre>
+<h2 id="23-复合类型"><a class="header" href="#23-复合类型">2.3 复合类型</a></h2>
+<h3 id="元组tuple"><a class="header" href="#元组tuple">元组（Tuple）</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let tuple: (i32, f64, char) = (50, 3.14, 'A');
+    
+    // 解构
+    let (x, y, z) = tuple;
+    println!("x = {}, y = {}, z = {}", x, y, z);
+    
+    // 索引访问
+    let first = tuple.0;
+    let second = tuple.1;
+    
+    // 空元组
+    let unit: () = ();
+}</code></pre></pre>
+<h3 id="数组array"><a class="header" href="#数组array">数组（Array）</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 固定长度数组
+    let arr: [i32; 5] = [1, 2, 3, 4, 5];
+    
+    // 简写：重复元素
+    let zeros = [0; 5];  // [0, 0, 0, 0, 0]
+    
+    // 访问元素
+    let first = arr[0];
+    let second = arr[1];
+    
+    // 数组长度
+    let len = arr.len();
+    
+    println!("数组长度：{}", len);
+}</code></pre></pre>
+<h3 id="数组越界示例"><a class="header" href="#数组越界示例">数组越界示例</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let arr = [1, 2, 3, 4, 5];
+    
+    // 运行时检查，越界会 panic
+    let index = 10;
+    let value = arr[index];  // 运行时错误！
+}</code></pre></pre>
+<h2 id="24-类型转换"><a class="header" href="#24-类型转换">2.4 类型转换</a></h2>
+<h3 id="数值转换"><a class="header" href="#数值转换">数值转换</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 显式转换（不会溢出检查）
+    let a: u8 = 255;
+    let b: u32 = a as u32;
+    
+    // 可能丢失精度
+    let c: f64 = 3.9;
+    let d: u32 = c as u32;  // 3 (截断小数)
+    
+    println!("b = {}, d = {}", b, d);
+}</code></pre></pre>
+<h3 id="类型推断失败"><a class="header" href="#类型推断失败">类型推断失败</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 需要类型注解
+    let guess: u32 = "42".parse().expect("不是数字！");
+    
+    // 或者使用 turbofish
+    let guess = "42".parse::&lt;u32&gt;().expect("不是数字！");
+}</code></pre></pre>
+<h2 id="25-实战示例"><a class="header" href="#25-实战示例">2.5 实战示例</a></h2>
+<h3 id="温度转换器"><a class="header" href="#温度转换器">温度转换器</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let celsius = 25.0;
+    let fahrenheit = celsius_to_fahrenheit(celsius);
+    
+    println!("{}°C = {}°F", celsius, fahrenheit);
+}
+
+fn celsius_to_fahrenheit(c: f64) -&gt; f64 {
+    (c * 9.0 / 5.0) + 32.0
+}</code></pre></pre>
+<h3 id="数组统计"><a class="header" href="#数组统计">数组统计</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let numbers = [10, 20, 30, 40, 50];
+    
+    let sum: i32 = numbers.iter().sum();
+    let avg = sum as f64 / numbers.len() as f64;
+    
+    println!("总和：{}, 平均值：{}", sum, avg);
+}</code></pre></pre>
+<h2 id="26-常见陷阱"><a class="header" href="#26-常见陷阱">2.6 常见陷阱</a></h2>
+<h3 id="整数溢出"><a class="header" href="#整数溢出">整数溢出</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x: u8 = 255;
+    // let y = x + 1;  // 调试模式：panic；发布模式：溢出
+    
+    // 安全的运算方法
+    let (y, overflowed) = x.overflowing_add(1);
+    println!("y = {}, overflowed = {}", y, overflowed);
+}</code></pre></pre>
+<h3 id="类型不匹配"><a class="header" href="#类型不匹配">类型不匹配</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;
+    let y = 5.0;
+    
+    // let z = x + y;  // 错误！不能直接相加
+    
+    let z = x as f64 + y;  // 正确
+}</code></pre></pre>
+<h2 id="27-练习题"><a class="header" href="#27-练习题">2.7 练习题</a></h2>
+<ol>
+<li>声明一个可变变量，初始值为 10，然后将其增加到 100</li>
+<li>创建一个包含姓名、年龄、身高的元组</li>
+<li>创建一个有 7 个元素的数组，表示一周的天数</li>
+<li>编写函数将华氏温度转换为摄氏温度</li>
+</ol>
+<h2 id="28-小结"><a class="header" href="#28-小结">2.8 小结</a></h2>
+<ul>
+<li>变量默认不可变，使用 <code>mut</code> 声明可变变量</li>
+<li>Rust 有强类型系统，支持类型推断</li>
+<li>整数类型分有符号（i）和无符号（u）</li>
+<li>数组是固定长度的，越界访问会 panic</li>
+<li>使用 <code>as</code> 进行显式类型转换</li>
+</ul>
+<hr />
+<p><a href="01-introduction.html">上一章：Rust 简介和安装 ←</a> | <a href="03-ownership-borrowing.html">下一章：所有权和借用 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-3-章所有权和借用"><a class="header" href="#第-3-章所有权和借用">第 3 章：所有权和借用</a></h1>
+<blockquote>
+<p>💡 <strong>所有权系统是 Rust 最核心的特性</strong>，它保证了内存安全而无需垃圾回收器。</p>
+</blockquote>
+<h2 id="31-所有权规则"><a class="header" href="#31-所有权规则">3.1 所有权规则</a></h2>
+<p>Rust 的所有权遵循三条简单规则：</p>
+<ol>
+<li><strong>每个值都有一个所有者</strong></li>
+<li><strong>同一时间只能有一个所有者</strong></li>
+<li><strong>当所有者离开作用域，值被丢弃</strong></li>
+</ol>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    {
+        let s = String::from("hello");  // s 是所有者
+    }  // s 离开作用域，内存被释放
+}</code></pre></pre>
+<h2 id="32-string-类型"><a class="header" href="#32-string-类型">3.2 String 类型</a></h2>
+<h3 id="string-vs-str"><a class="header" href="#string-vs-str">String vs &amp;str</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // String: 可增长、可变的字符串（堆上）
+    let mut s = String::from("hello");
+    s.push_str(", world!");
+    
+    // &amp;str: 字符串切片（通常是栈上的引用）
+    let literal: &amp;str = "hello";
+    let slice: &amp;str = &amp;s[0..5];
+    
+    println!("s = {}", s);
+}</code></pre></pre>
+<h3 id="内存布局"><a class="header" href="#内存布局">内存布局</a></h3>
+<pre><code>String 结构：
+┌─────────┬───────┬───────┐
+│ pointer │ len   │ cap   │
+│  0x100  │  5    │  10   │
+└─────────┴───────┴───────┘
+     ↓
+┌─────────────────┐
+│ h e l l o       │ (堆内存)
+└─────────────────┘
+</code></pre>
+<h2 id="33-移动语义move"><a class="header" href="#33-移动语义move">3.3 移动语义（Move）</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1;  // 移动！s1 不再有效
+    
+    // println!("{}", s1);  // 错误！s1 已被移动
+    
+    println!("{}", s2);  // 正确
+}</code></pre></pre>
+<h3 id="深层复制"><a class="header" href="#深层复制">深层复制</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = String::from("hello");
+    let s2 = s1.clone();  // 深拷贝
+    
+    println!("s1 = {}, s2 = {}", s1, s2);  // 都有效
+}</code></pre></pre>
+<h3 id="copy-trait"><a class="header" href="#copy-trait">Copy trait</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = 5;
+    let y = x;  // 复制（i32 实现了 Copy）
+    
+    println!("x = {}, y = {}", x, y);  // 都有效
+    
+    // 实现 Copy 的类型：
+    // - 所有整数类型
+    // - 布尔类型
+    // - 浮点类型
+    // - 字符类型
+    // - 元组（仅当所有元素都实现 Copy）
+}</code></pre></pre>
+<h2 id="34-所有权与函数"><a class="header" href="#34-所有权与函数">3.4 所有权与函数</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("hello");
+    takes_ownership(s);  // s 被移动
+    
+    // println!("{}", s);  // 错误！
+    
+    let x = 5;
+    makes_copy(x);  // x 被复制
+    println!("{}", x);  // 正确
+}
+
+fn takes_ownership(some_string: String) {
+    println!("{}", some_string);
+}  // some_string 离开作用域，内存释放
+
+fn makes_copy(some_integer: i32) {
+    println!("{}", some_integer);
+}</code></pre></pre>
+<h3 id="返回所有权"><a class="header" href="#返回所有权">返回所有权</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s1 = gives_ownership();
+    let s2 = String::from("hello");
+    let s3 = takes_and_gives_back(s2);
+    
+    // s2 已被移动，不能使用
+    println!("s1 = {}, s3 = {}", s1, s3);
+}
+
+fn gives_ownership() -&gt; String {
+    String::from("hello")
+}
+
+fn takes_and_gives_back(a_string: String) -&gt; String {
+    a_string
+}</code></pre></pre>
+<h2 id="35-引用和借用"><a class="header" href="#35-引用和借用">3.5 引用和借用</a></h2>
+<h3 id="不可变引用"><a class="header" href="#不可变引用">不可变引用</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("hello");
+    
+    let len = calculate_length(&amp;s);  // &amp;s 创建引用
+    
+    println!("{} 的长度是 {}", s, len);
+}
+
+fn calculate_length(s: &amp;String) -&gt; usize {
+    s.len()
+}  // s 离开作用域，但不释放内存（因为不是所有者）</code></pre></pre>
+<h3 id="可变引用"><a class="header" href="#可变引用">可变引用</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+    
+    change(&amp;mut s);
+    
+    println!("{}", s);  // 输出：hello, world
+}
+
+fn change(some_string: &amp;mut String) {
+    some_string.push_str(", world");
+}</code></pre></pre>
+<h3 id="引用规则"><a class="header" href="#引用规则">引用规则</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+    
+    // 规则 1: 同一时间只能有一个可变引用
+    let r1 = &amp;mut s;
+    // let r2 = &amp;mut s;  // 错误！
+    
+    // 规则 2: 可变引用时不能有不可变引用
+    let r1 = &amp;s;
+    let r2 = &amp;s;
+    // let r3 = &amp;mut s;  // 错误！
+    
+    println!("{}, {}, and {}", r1, r2, s);
+}</code></pre></pre>
+<h3 id="作用域分离"><a class="header" href="#作用域分离">作用域分离</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+    
+    {
+        let r1 = &amp;mut s;
+        r1.push_str(", world");
+    }  // r1 离开作用域
+    
+    let r2 = &amp;mut s;  // 正确！r1 已释放
+    r2.push_str("!");
+    
+    println!("{}", s);
+}</code></pre></pre>
+<h2 id="36-悬垂引用"><a class="header" href="#36-悬垂引用">3.6 悬垂引用</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误示例：返回悬垂引用
+fn dangle() -&gt; &amp;String {
+    let s = String::from("hello");
+    &amp;s  // 错误！s 将被释放
+}
+
+// 正确：返回所有权
+fn no_dangle() -&gt; String {
+    String::from("hello")
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="37-切片slices"><a class="header" href="#37-切片slices">3.7 切片（Slices）</a></h2>
+<h3 id="字符串切片"><a class="header" href="#字符串切片">字符串切片</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("hello world");
+    
+    let hello = &amp;s[0..5];  // "hello"
+    let world = &amp;s[6..11]; // "world"
+    let hello = &amp;s[..5];   // 简写
+    let world = &amp;s[6..];   // 简写
+    let whole = &amp;s[..];    // 整个字符串
+    
+    println!("{} {}", hello, world);
+}</code></pre></pre>
+<h3 id="切片作为参数"><a class="header" href="#切片作为参数">切片作为参数</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let s = String::from("hello world");
+    let word = first_word(&amp;s);
+    
+    println!("第一个单词：{}", word);
+}
+
+fn first_word(s: &amp;str) -&gt; &amp;str {
+    let bytes = s.as_bytes();
+    
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+    
+    &amp;s[..]
+}</code></pre></pre>
+<h3 id="其他切片"><a class="header" href="#其他切片">其他切片</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let arr = [1, 2, 3, 4, 5];
+    
+    let slice: &amp;[i32] = &amp;arr[1..3];  // [2, 3]
+    
+    println!("{:?}", slice);
+}</code></pre></pre>
+<h2 id="38-实战示例"><a class="header" href="#38-实战示例">3.8 实战示例</a></h2>
+<h3 id="统计单词"><a class="header" href="#统计单词">统计单词</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn count_words(text: &amp;str) -&gt; usize {
+    text.split_whitespace().count()
+}
+
+fn main() {
+    let s = String::from("Rust is awesome");
+    let count = count_words(&amp;s);
+    println!("单词数：{}", count);  // 3
+}</code></pre></pre>
+<h3 id="字符串处理"><a class="header" href="#字符串处理">字符串处理</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::new();
+    
+    s.push_str("Hello");
+    s.push('!');
+    
+    // 使用引用，不转移所有权
+    let len = s.len();
+    
+    println!("{} (长度：{})", s, len);
+}</code></pre></pre>
+<h2 id="39-常见陷阱"><a class="header" href="#39-常见陷阱">3.9 常见陷阱</a></h2>
+<h3 id="借用检查器错误"><a class="header" href="#借用检查器错误">借用检查器错误</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut s = String::from("hello");
+    
+    let r1 = &amp;s;
+    let r2 = &amp;s;
+    
+    println!("{} and {}", r1, r2);
+    // r1 和 r2 不再使用
+    
+    let r3 = &amp;mut s;  // 正确！r1, r2 作用域结束
+    r3.push_str(", world");
+}</code></pre></pre>
+<h3 id="迭代器借用"><a class="header" href="#迭代器借用">迭代器借用</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let mut numbers = vec![1, 2, 3, 4, 5];
+    
+    // 错误：同时存在不可变和可变借用
+    // for num in &amp;numbers {
+    //     numbers.push(*num);  // 错误！
+    // }
+    
+    // 正确：先收集，再添加
+    let to_add: Vec&lt;i32&gt; = numbers.iter().copied().collect();
+    for num in to_add {
+        numbers.push(num);
+    }
+}</code></pre></pre>
+<h2 id="310-练习题"><a class="header" href="#310-练习题">3.10 练习题</a></h2>
+<ol>
+<li>解释为什么 <code>let s2 = s1</code> 对 String 是移动，对 i32 是复制</li>
+<li>编写函数，接受 &amp;str 参数，返回第一个字符</li>
+<li>修复代码中的借用错误</li>
+<li>使用切片反转字符串中的单词顺序</li>
+</ol>
+<h2 id="311-小结"><a class="header" href="#311-小结">3.11 小结</a></h2>
+<ul>
+<li>所有权保证内存安全：一个值只有一个所有者</li>
+<li>移动语义：赋值会转移所有权</li>
+<li>引用允许借用而不获取所有权</li>
+<li>同一时间只能有一个可变引用，或多个不可变引用</li>
+<li>切片是对连续内存的引用，不拥有数据</li>
+</ul>
+<hr />
+<p><a href="02-variables-types.html">上一章：变量和数据类型 ←</a> | <a href="04-structs-enums.html">下一章：结构体和枚举 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-4-章结构体和枚举"><a class="header" href="#第-4-章结构体和枚举">第 4 章：结构体和枚举</a></h1>
+<h2 id="41-结构体struct"><a class="header" href="#41-结构体struct">4.1 结构体（Struct）</a></h2>
+<h3 id="定义结构体"><a class="header" href="#定义结构体">定义结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+fn main() {
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+    
+    println!("{} - {}", user1.username, user1.email);
+}</code></pre></pre>
+<h3 id="字段初始化简写"><a class="header" href="#字段初始化简写">字段初始化简写</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let username = String::from("rustacean");
+    let email = String::from("rust@example.com");
+    
+    let user = User {
+        username,  // 等价于 username: username
+        email,
+        active: true,
+        sign_in_count: 1,
+    };
+}</code></pre></pre>
+<h3 id="结构体更新语法"><a class="header" href="#结构体更新语法">结构体更新语法</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+    
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1  // 复用 user1 的其他字段
+    };
+    
+    // user1.username 已被移动，不能使用
+}</code></pre></pre>
+<h3 id="元组结构体"><a class="header" href="#元组结构体">元组结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+    
+    // 访问字段
+    println!("R: {}", black.0);
+    println!("X: {}", origin.0);
+    
+    // 解构
+    let Color(r, g, b) = black;
+}</code></pre></pre>
+<h3 id="单元结构体"><a class="header" href="#单元结构体">单元结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}</code></pre></pre>
+<h2 id="42-结构体方法"><a class="header" href="#42-结构体方法">4.2 结构体方法</a></h2>
+<h3 id="impl-块"><a class="header" href="#impl-块">impl 块</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // 关联函数（构造器）
+    fn new(width: u32, height: u32) -&gt; Self {
+        Rectangle { width, height }
+    }
+    
+    // 实例方法
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+    
+    fn perimeter(&amp;self) -&gt; u32 {
+        2 * (self.width + self.height)
+    }
+    
+    // 可变方法
+    fn scale(&amp;mut self, factor: u32) {
+        self.width *= factor;
+        self.height *= factor;
+    }
+    
+    // 多个参数
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle::new(30, 50);
+    let rect2 = Rectangle::new(10, 20);
+    
+    println!("面积：{}", rect1.area());
+    println!("周长：{}", rect1.perimeter());
+    println!("rect1 能容纳 rect2: {}", rect1.can_hold(&amp;rect2));
+    
+    println!("{:?}", rect1);  // 需要 Debug trait
+}</code></pre></pre>
+<h3 id="多个-impl-块"><a class="header" href="#多个-impl-块">多个 impl 块</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn perimeter(&amp;self) -&gt; u32 {
+        2 * (self.width + self.height)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="43-枚举enum"><a class="header" href="#43-枚举enum">4.3 枚举（Enum）</a></h2>
+<h3 id="定义枚举"><a class="header" href="#定义枚举">定义枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+fn main() {
+    let dir = Direction::North;
+    
+    match dir {
+        Direction::North =&gt; println!("向北"),
+        Direction::South =&gt; println!("向南"),
+        Direction::East =&gt; println!("向东"),
+        Direction::West =&gt; println!("向西"),
+    }
+}</code></pre></pre>
+<h3 id="带数据的枚举"><a class="header" href="#带数据的枚举">带数据的枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Message {
+    Quit,                       // 无数据
+    Move { x: i32, y: i32 },   // 命名字段
+    Write(String),              // 单个值
+    ChangeColor(i32, i32, i32), // 多个值
+}
+
+fn main() {
+    let m1 = Message::Quit;
+    let m2 = Message::Move { x: 10, y: 20 };
+    let m3 = Message::Write(String::from("hello"));
+    let m4 = Message::ChangeColor(255, 0, 0);
+}</code></pre></pre>
+<h3 id="option-枚举"><a class="header" href="#option-枚举">Option 枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let some_number: Option&lt;i32&gt; = Some(5);
+    let absent_number: Option&lt;i32&gt; = None;
+    
+    // Option 是 Rust 中最常用的枚举
+    // 替代 null，更安全
+    
+    match some_number {
+        Some(n) =&gt; println!("数字：{}", n),
+        None =&gt; println!("没有数字"),
+    }
+}</code></pre></pre>
+<h2 id="44-match-表达式"><a class="header" href="#44-match-表达式">4.4 match 表达式</a></h2>
+<h3 id="基础用法"><a class="header" href="#基础用法">基础用法</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let coin = "head";
+    
+    match coin {
+        "head" =&gt; println!("正面！"),
+        "tail" =&gt; println!("反面！"),
+        _ =&gt; println!("边缘？"),
+    }
+}</code></pre></pre>
+<h3 id="匹配枚举"><a class="header" href="#匹配枚举">匹配枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; {
+            println!("幸运便士！");
+            1
+        },
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter =&gt; 25,
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="匹配-option"><a class="header" href="#匹配-option">匹配 Option</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn plus_one(x: Option&lt;i32&gt;) -&gt; Option&lt;i32&gt; {
+    match x {
+        None =&gt; None,
+        Some(i) =&gt; Some(i + 1),
+    }
+}
+
+fn main() {
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}</code></pre></pre>
+<h3 id="通配符和占位符"><a class="header" href="#通配符和占位符">通配符和占位符</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let dice = 3;
+    
+    match dice {
+        1 =&gt; println!("一"),
+        2 =&gt; println!("二"),
+        3..=6 =&gt; println!("三到六"),  // 范围
+        _ =&gt; println!("其他"),         // 通配符
+    }
+    
+    let x = Some(5);
+    match x {
+        Some(5) =&gt; println!("五"),
+        Some(_) =&gt; println!("其他值"),  // 占位符
+        None =&gt; println!("无"),
+    }
+}</code></pre></pre>
+<h2 id="45-if-let"><a class="header" href="#45-if-let">4.5 if let</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let config_max = Some(3u8);
+    
+    // 简洁的 match
+    if let Some(max) = config_max {
+        println!("最大值：{}", max);
+    }
+    
+    // 带 else
+    let coin = Some("head");
+    if let Some(side) = coin {
+        println!("正面：{}", side);
+    } else {
+        println!("反面");
+    }
+}</code></pre></pre>
+<h2 id="46-实战示例"><a class="header" href="#46-实战示例">4.6 实战示例</a></h2>
+<h3 id="用户系统"><a class="header" href="#用户系统">用户系统</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+struct User {
+    id: u64,
+    username: String,
+    email: String,
+}
+
+impl User {
+    fn new(id: u64, username: &amp;str, email: &amp;str) -&gt; Self {
+        User {
+            id,
+            username: username.to_string(),
+            email: email.to_string(),
+        }
+    }
+    
+    fn display(&amp;self) {
+        println!("用户 #{}: {} &lt;{}&gt;", 
+                 self.id, self.username, self.email);
+    }
+}
+
+fn main() {
+    let user = User::new(1, "rustacean", "rust@example.com");
+    user.display();
+}</code></pre></pre>
+<h3 id="形状计算"><a class="header" href="#形状计算">形状计算</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+enum Shape {
+    Circle(f64),           // 半径
+    Rectangle(f64, f64),   // 宽，高
+    Triangle(f64, f64),    // 底，高
+}
+
+impl Shape {
+    fn area(&amp;self) -&gt; f64 {
+        match self {
+            Shape::Circle(r) =&gt; std::f64::consts::PI * r * r,
+            Shape::Rectangle(w, h) =&gt; w * h,
+            Shape::Triangle(b, h) =&gt; 0.5 * b * h,
+        }
+    }
+}
+
+fn main() {
+    let shapes = vec![
+        Shape::Circle(5.0),
+        Shape::Rectangle(10.0, 5.0),
+        Shape::Triangle(10.0, 5.0),
+    ];
+    
+    for shape in shapes {
+        println!("{:?} 面积：{:.2}", shape, shape.area());
+    }
+}</code></pre></pre>
+<h2 id="47-派生-trait"><a class="header" href="#47-派生-trait">4.7 派生 Trait</a></h2>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let p1 = Point { x: 10, y: 20 };
+    let p2 = p1;  // Copy trait
+    
+    println!("{:?}", p1);  // Debug trait
+    println!("{}", p1 == p2);  // PartialEq trait
+}</code></pre></pre>
+<h3 id="常用派生宏"><a class="header" href="#常用派生宏">常用派生宏</a></h3>
+<ul>
+<li><code>Debug</code> - 调试输出 <code>{:?}</code></li>
+<li><code>Clone</code> - 深拷贝 <code>.clone()</code></li>
+<li><code>Copy</code> - 隐式复制</li>
+<li><code>PartialEq</code> - 比较 <code>==</code></li>
+<li><code>Eq</code> - 完全相等</li>
+<li><code>Hash</code> - 哈希</li>
+<li><code>Default</code> - 默认值</li>
+</ul>
+<h2 id="48-练习题"><a class="header" href="#48-练习题">4.8 练习题</a></h2>
+<ol>
+<li>创建一个表示学生的结构体，包含姓名、年龄、成绩</li>
+<li>为 Student 实现计算平均分的方法</li>
+<li>创建一个表示网络事件的枚举（连接、断开、数据）</li>
+<li>使用 match 处理不同的网络事件</li>
+</ol>
+<h2 id="49-小结"><a class="header" href="#49-小结">4.9 小结</a></h2>
+<ul>
+<li>结构体用于创建自定义数据类型</li>
+<li>impl 块定义结构体的方法</li>
+<li>枚举可以包含不同类型的数据</li>
+<li>match 强制穷尽性检查，更安全</li>
+<li>Option 枚举替代 null，避免空指针错误</li>
+</ul>
+<hr />
+<p><a href="03-ownership-borrowing.html">上一章：所有权和借用 ←</a> | <a href="05-pattern-matching.html">下一章：模式匹配 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-5-章模式匹配"><a class="header" href="#第-5-章模式匹配">第 5 章：模式匹配</a></h1>
+<h2 id="51-模式概述"><a class="header" href="#51-模式概述">5.1 模式概述</a></h2>
+<p>模式是 Rust 中强大的匹配工具，用于<strong>解构</strong>和<strong>匹配</strong>数据结构。</p>
+<h3 id="模式出现的地方"><a class="header" href="#模式出现的地方">模式出现的地方</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 1. match 表达式
+match value {
+    pattern =&gt; expression,
+}
+
+// 2. if let
+if let pattern = value {
+    // ...
+}
+
+// 3. let 语句
+let pattern = value;
+
+// 4. 函数参数
+fn func(pattern: Type) { }
+
+// 5. for 循环
+for pattern in iterator { }
+<span class="boring">}</span></code></pre></pre>
+<h2 id="52-字面量模式"><a class="header" href="#52-字面量模式">5.2 字面量模式</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let number = 5;
+    
+    match number {
+        1 =&gt; println!("一"),
+        2 =&gt; println!("二"),
+        3 | 4 | 5 =&gt; println!("三到五"),  // 多模式
+        _ =&gt; println!("其他"),
+    }
+}</code></pre></pre>
+<h3 id="字符和字符串"><a class="header" href="#字符和字符串">字符和字符串</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let ch = 'a';
+    
+    match ch {
+        'a'..='z' =&gt; println!("小写字母"),
+        'A'..='Z' =&gt; println!("大写字母"),
+        '0'..='9' =&gt; println!("数字"),
+        _ =&gt; println!("其他字符"),
+    }
+    
+    let s = "hello";
+    match s {
+        "hello" =&gt; println!("问候"),
+        "bye" =&gt; println!("告别"),
+        _ =&gt; println!("其他"),
+    }
+}</code></pre></pre>
+<h2 id="53-变量模式"><a class="header" href="#53-变量模式">5.3 变量模式</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = Some(5);
+    let y = 10;
+    
+    match x {
+        Some(5) =&gt; println!("五"),
+        Some(y) =&gt; println!("其他值：{}", y),  // 新变量 y
+        None =&gt; println!("无"),
+    }
+    
+    println!("外层的 y = {}", y);  // 仍然是 10
+}</code></pre></pre>
+<h3 id="匹配守卫"><a class="header" href="#匹配守卫">匹配守卫</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let num = Some(4);
+    
+    match num {
+        Some(x) if x &lt; 5 =&gt; println!("小于 5: {}", x),
+        Some(x) =&gt; println!("大于等于 5: {}", x),
+        None =&gt; println!("无"),
+    }
+}</code></pre></pre>
+<h3 id="-绑定"><a class="header" href="#-绑定">@ 绑定</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let msg = Some("hello");
+    
+    match msg {
+        Some(s @ "hello") =&gt; println!("找到问候：{}", s),
+        Some(s) =&gt; println!("其他：{}", s),
+        None =&gt; println!("无"),
+    }
+    
+    // 范围 + @
+    let n = 5;
+    match n {
+        n @ 1..=5 =&gt; println!("小数字：{}", n),
+        n @ 6..=10 =&gt; println!("中数字：{}", n),
+        _ =&gt; println!("大数字"),
+    }
+}</code></pre></pre>
+<h2 id="54-解构模式"><a class="header" href="#54-解构模式">5.4 解构模式</a></h2>
+<h3 id="元组解构"><a class="header" href="#元组解构">元组解构</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let point = (3, 5);
+    
+    // let 语句
+    let (x, y) = point;
+    println!("({}, {})", x, y);
+    
+    // match
+    match point {
+        (0, 0) =&gt; println!("原点"),
+        (0, y) =&gt; println!("在 Y 轴上：{}", y),
+        (x, 0) =&gt; println!("在 X 轴上：{}", x),
+        (x, y) =&gt; println!("其他位置：({}, {})", x, y),
+    }
+    
+    // 忽略部分
+    let (x, ..) = point;  // 只取第一个
+    let (.., y) = point;  // 只取最后一个
+}</code></pre></pre>
+<h3 id="结构体解构"><a class="header" href="#结构体解构">结构体解构</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let p = Point { x: 10, y: 20 };
+    
+    // 完整解构
+    let Point { x, y } = p;
+    println!("({}, {})", x, y);
+    
+    // 重命名
+    let Point { x: a, y: b } = p;
+    
+    // 部分解构
+    let Point { x, .. } = p;
+    println!("x = {}", x);
+    
+    // match 中使用
+    match p {
+        Point { x, y: 0 } =&gt; println!("在 X 轴：{}", x),
+        Point { x: 0, y } =&gt; println!("在 Y 轴：{}", y),
+        Point { x, y } =&gt; println!("其他：({}, {})", x, y),
+    }
+}</code></pre></pre>
+<h3 id="结构体简写"><a class="header" href="#结构体简写">结构体简写</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let p = Point { x: 10, y: 20 };
+    
+    // 字段名和变量名相同
+    let Point { x, y } = p;
+    
+    // 等价于
+    let Point { x: x, y: y } = p;
+}</code></pre></pre>
+<h3 id="枚举解构"><a class="header" href="#枚举解构">枚举解构</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(i32, i32, i32),
+}
+
+fn main() {
+    let msg = Message::Move { x: 10, y: 20 };
+    
+    match msg {
+        Message::Quit =&gt; println!("退出"),
+        Message::Move { x, y } =&gt; println!("移动到 ({}, {})", x, y),
+        Message::Write(text) =&gt; println!("文本：{}", text),
+        Message::ChangeColor(r, g, b) =&gt; {
+            println!("颜色：RGB({}, {}, {})", r, g, b)
+        },
+    }
+}</code></pre></pre>
+<h2 id="55-嵌套模式"><a class="header" href="#55-嵌套模式">5.5 嵌套模式</a></h2>
+<pre><pre class="playground"><code class="language-rust">enum Color {
+    Rgb(i32, i32, i32),
+    Hsv(i32, i32, i32),
+}
+
+enum Message {
+    Quit,
+    Move { x: i32, y: i32 },
+    Write(String),
+    ChangeColor(Color),
+}
+
+fn main() {
+    let msg = Message::ChangeColor(Color::Rgb(255, 0, 0));
+    
+    match msg {
+        Message::ChangeColor(Color::Rgb(r, g, b)) =&gt; {
+            println!("RGB: {}, {}, {}", r, g, b);
+        },
+        Message::ChangeColor(Color::Hsv(h, s, v)) =&gt; {
+            println!("HSV: {}, {}, {}", h, s, v);
+        },
+        _ =&gt; println!("其他消息"),
+    }
+}</code></pre></pre>
+<h2 id="56-引用和模式"><a class="header" href="#56-引用和模式">5.6 引用和模式</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let point = Box::new(Point { x: 10, y: 20 });
+    
+    // 解构 Box
+    let Point { x, y } = *point;
+    
+    // 引用匹配
+    let c = Some('x');
+    match &amp;c {
+        Some(&amp;ch) =&gt; println!("字符：{}", ch),
+        None =&gt; println!("无"),
+    }
+    
+    // 或
+    match c {
+        Some(ch) =&gt; println!("字符：{}", ch),
+        None =&gt; println!("无"),
+    }
+}</code></pre></pre>
+<h2 id="57-忽略模式"><a class="header" href="#57-忽略模式">5.7 忽略模式</a></h2>
+<h3 id="使用-_"><a class="header" href="#使用-_">使用 _</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let (x, _, z) = (1, 2, 3);  // 忽略中间值
+    
+    // 忽略多个
+    let (a, .., b) = (1, 2, 3, 4, 5);
+    println!("{} {}", a, b);  // 1 5
+}</code></pre></pre>
+<h3 id="多个-_"><a class="header" href="#多个-_">多个 _</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    struct Point {
+        x: i32,
+        y: i32,
+        z: i32,
+    }
+    
+    let origin = Point { x: 0, y: 0, z: 0 };
+    
+    // 只匹配 x
+    match origin {
+        Point { x, .. } =&gt; println!("x = {}", x),
+    }
+    
+    // 忽略整个值
+    let _ = Some(5);  // 不绑定变量
+}</code></pre></pre>
+<h2 id="58-实战示例"><a class="header" href="#58-实战示例">5.8 实战示例</a></h2>
+<h3 id="解析命令"><a class="header" href="#解析命令">解析命令</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Command {
+    Move { x: i32, y: i32 },
+    Draw { shape: String, color: String },
+    Quit,
+}
+
+fn parse_command(input: &amp;str) -&gt; Option&lt;Command&gt; {
+    match input.split_whitespace().collect::&lt;Vec&lt;_&gt;&gt;().as_slice() {
+        ["move", x, y] =&gt; {
+            Some(Command::Move {
+                x: x.parse().ok()?,
+                y: y.parse().ok()?,
+            })
+        },
+        ["draw", shape, color] =&gt; {
+            Some(Command::Draw {
+                shape: shape.to_string(),
+                color: color.to_string(),
+            })
+        },
+        ["quit"] =&gt; Some(Command::Quit),
+        _ =&gt; None,
+    }
+}
+
+fn main() {
+    let cmd = parse_command("move 10 20");
+    match cmd {
+        Some(Command::Move { x, y }) =&gt; println!("移动到 ({}, {})", x, y),
+        _ =&gt; println!("无效命令"),
+    }
+}</code></pre></pre>
+<h3 id="配置解析"><a class="header" href="#配置解析">配置解析</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+enum ConfigValue {
+    String(String),
+    Number(i32),
+    Boolean(bool),
+    None,
+}
+
+fn get_config_value(key: &amp;str) -&gt; ConfigValue {
+    match key {
+        "host" =&gt; ConfigValue::String("localhost".to_string()),
+        "port" =&gt; ConfigValue::Number(8080),
+        "debug" =&gt; ConfigValue::Boolean(true),
+        _ =&gt; ConfigValue::None,
+    }
+}
+
+fn main() {
+    let value = get_config_value("port");
+    match value {
+        ConfigValue::Number(n) =&gt; println!("端口：{}", n),
+        _ =&gt; println!("不是数字"),
+    }
+}</code></pre></pre>
+<h2 id="59-match-的高级用法"><a class="header" href="#59-match-的高级用法">5.9 match 的高级用法</a></h2>
+<h3 id="返回值的-match"><a class="header" href="#返回值的-match">返回值的 match</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let result = match 5 {
+        1 =&gt; "一",
+        2 =&gt; "二",
+        n if n &lt; 5 =&gt; "小数字",
+        _ =&gt; "其他",
+    };
+    
+    println!("{}", result);
+}</code></pre></pre>
+<h3 id="链式方法调用"><a class="header" href="#链式方法调用">链式方法调用</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let x = Some(5);
+    
+    let y = match x {
+        Some(n) =&gt; n * 2,
+        None =&gt; 0,
+    };
+    
+    println!("{}", y);  // 10
+}</code></pre></pre>
+<h2 id="510-练习题"><a class="header" href="#510-练习题">5.10 练习题</a></h2>
+<ol>
+<li>使用模式匹配解构嵌套的元组 <code>((1, 2), (3, 4))</code></li>
+<li>创建一个表示 HTTP 请求的枚举，匹配不同的请求方法</li>
+<li>使用匹配守卫检查数字是否为正偶数</li>
+<li>解构包含 Option 的结构体</li>
+</ol>
+<h2 id="511-小结"><a class="header" href="#511-小结">5.11 小结</a></h2>
+<ul>
+<li>模式用于匹配和解构数据</li>
+<li>match 强制穷尽性检查</li>
+<li>可以使用守卫添加额外条件</li>
+<li>@ 语法同时绑定和匹配</li>
+<li>_ 用于忽略不需要的值</li>
+<li>模式可以嵌套，处理复杂数据结构</li>
+</ul>
+<hr />
+<p><a href="04-structs-enums.html">上一章：结构体和枚举 ←</a> | <a href="06-error-handling.html">下一章：错误处理 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-6-章错误处理"><a class="header" href="#第-6-章错误处理">第 6 章：错误处理</a></h1>
+<h2 id="61-rust-的错误处理哲学"><a class="header" href="#61-rust-的错误处理哲学">6.1 Rust 的错误处理哲学</a></h2>
+<p>Rust 将错误分为两类：</p>
+<ol>
+<li><strong>可恢复错误</strong> - 使用 <code>Result&lt;T, E&gt;</code></li>
+<li><strong>不可恢复错误</strong> - 使用 <code>panic!</code></li>
+</ol>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 可恢复错误：文件不存在，可以尝试其他路径
+let file = File::open("hello.txt");
+
+// 不可恢复错误：逻辑错误，无法继续
+panic!("crash and burn!");
+<span class="boring">}</span></code></pre></pre>
+<h2 id="62-panic-宏"><a class="header" href="#62-panic-宏">6.2 panic! 宏</a></h2>
+<h3 id="触发-panic"><a class="header" href="#触发-panic">触发 panic</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    panic!("出错了！");
+    
+    // 数组越界
+    let v = vec![1, 2, 3];
+    v[99];  // panic!
+    
+    // 除零（调试模式）
+    // let x = 1 / 0;
+}</code></pre></pre>
+<h3 id="调用栈"><a class="header" href="#调用栈">调用栈</a></h3>
+<pre><code class="language-bash">$ cargo run
+thread 'main' panicked at '出错了！', src/main.rs:2:5
+stack backtrace:
+   0: std::panicking::begin_panic
+   1: my_program::main
+   ...
+</code></pre>
+<h3 id="环境变量"><a class="header" href="#环境变量">环境变量</a></h3>
+<pre><code class="language-bash"># 发布模式：panic 时直接中止（更快更小）
+RUSTFLAGS="-C panic=abort" cargo build --release
+
+# 调试模式：展开栈（默认）
+</code></pre>
+<h3 id="何时使用-panic"><a class="header" href="#何时使用-panic">何时使用 panic!</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 适合 panic 的场景：
+// 1. 示例/原型代码
+// 2. 测试代码
+// 3. 逻辑上不可能发生的情况
+// 4. 无法恢复的错误状态
+
+// ❌ 避免 panic 的场景：
+// 1. 用户输入错误
+// 2. 文件不存在
+// 3. 网络错误
+// 4. 任何预期可能失败的操作
+<span class="boring">}</span></code></pre></pre>
+<h2 id="63-result-枚举"><a class="header" href="#63-result-枚举">6.3 Result 枚举</a></h2>
+<h3 id="result-定义"><a class="header" href="#result-定义">Result 定义</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Result&lt;T, E&gt; {
+    Ok(T),   // 成功
+    Err(E),  // 错误
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="处理-result"><a class="header" href="#处理-result">处理 Result</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    let file_result = File::open("hello.txt");
+    
+    let file = match file_result {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; panic!("打开文件失败：{:?}", error),
+    };
+}</code></pre></pre>
+<h3 id="匹配具体错误"><a class="header" href="#匹配具体错误">匹配具体错误</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+use std::io::ErrorKind;
+
+fn main() {
+    let file = match File::open("hello.txt") {
+        Ok(file) =&gt; file,
+        Err(error) =&gt; match error.kind() {
+            ErrorKind::NotFound =&gt; {
+                match File::create("hello.txt") {
+                    Ok(fc) =&gt; fc,
+                    Err(e) =&gt; panic!("创建文件失败：{:?}", e),
+                }
+            },
+            other_error =&gt; {
+                panic!("打开文件失败：{:?}", other_error)
+            },
+        },
+    };
+}</code></pre></pre>
+<h2 id="64-简化错误处理"><a class="header" href="#64-简化错误处理">6.4 简化错误处理</a></h2>
+<h3 id="unwrap"><a class="header" href="#unwrap">unwrap</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    // Ok 时返回值，Err 时 panic
+    let file = File::open("hello.txt").unwrap();
+}</code></pre></pre>
+<h3 id="expect"><a class="header" href="#expect">expect</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::File;
+
+fn main() {
+    // 类似 unwrap，但可自定义错误信息
+    let file = File::open("hello.txt")
+        .expect("无法打开 hello.txt");
+}</code></pre></pre>
+<h3 id="unwrap_or-和-unwrap_or_else"><a class="header" href="#unwrap_or-和-unwrap_or_else">unwrap_or 和 unwrap_or_else</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 失败时使用默认值
+    let file = File::open("hello.txt")
+        .unwrap_or(create_default_file());
+    
+    // 失败时执行闭包
+    let file = File::open("hello.txt")
+        .unwrap_or_else(|_| create_default_file());
+}</code></pre></pre>
+<h2 id="65-传播错误"><a class="header" href="#65-传播错误">6.5 传播错误</a></h2>
+<h3 id="match-传播"><a class="header" href="#match-传播">match 传播</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let file = match File::open("hello.txt") {
+        Ok(f) =&gt; f,
+        Err(e) =&gt; return Err(e),
+    };
+    
+    let mut contents = String::new();
+    match file.read_to_string(&amp;mut contents) {
+        Ok(_) =&gt; Ok(contents),
+        Err(e) =&gt; Err(e),
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="-运算符"><a class="header" href="#-运算符">? 运算符</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut file = File::open("hello.txt")?;
+    let mut contents = String::new();
+    file.read_to_string(&amp;mut contents)?;
+    Ok(contents)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="链式调用"><a class="header" href="#链式调用">链式调用</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io::{self, Read};
+
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    let mut contents = String::new();
+    File::open("hello.txt")?
+        .read_to_string(&amp;mut contents)?;
+    Ok(contents)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="-的使用限制"><a class="header" href="#-的使用限制">? 的使用限制</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 正确：函数返回 Result
+fn read_file() -&gt; Result&lt;String, io::Error&gt; {
+    File::open("hello.txt")?;
+    Ok(String::new())
+}
+
+// ❌ 错误：函数返回 Option
+// fn get_first() -&gt; Option&lt;i32&gt; {
+//     let file = File::open("hello.txt")?;  // 类型不匹配
+//     Some(1)
+// }
+<span class="boring">}</span></code></pre></pre>
+<h2 id="66-错误类型转换"><a class="header" href="#66-错误类型转换">6.6 错误类型转换</a></h2>
+<h3 id="from-trait"><a class="header" href="#from-trait">From trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fs::File;
+use std::io;
+use std::num::ParseIntError;
+
+fn read_and_parse() -&gt; Result&lt;i32, Box&lt;dyn std::error::Error&gt;&gt; {
+    let contents = std::fs::read_to_string("number.txt")?;
+    let number: i32 = contents.trim().parse()?;
+    Ok(number)
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="自定义错误类型"><a class="header" href="#自定义错误类型">自定义错误类型</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::fmt;
+use std::error::Error;
+
+#[derive(Debug)]
+enum MyError {
+    Io(std::io::Error),
+    Parse(std::num::ParseIntError),
+    NotFound(String),
+}
+
+impl fmt::Display for MyError {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        match self {
+            MyError::Io(err) =&gt; write!(f, "IO 错误：{}", err),
+            MyError::Parse(err) =&gt; write!(f, "解析错误：{}", err),
+            MyError::NotFound(path) =&gt; write!(f, "文件不存在：{}", path),
+        }
+    }
+}
+
+impl Error for MyError {}
+
+impl From&lt;std::io::Error&gt; for MyError {
+    fn from(err: std::io::Error) -&gt; MyError {
+        MyError::Io(err)
+    }
+}
+
+impl From&lt;std::num::ParseIntError&gt; for MyError {
+    fn from(err: std::num::ParseIntError) -&gt; MyError {
+        MyError::Parse(err)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="67-thiserror-和-anyhow"><a class="header" href="#67-thiserror-和-anyhow">6.7 thiserror 和 anyhow</a></h2>
+<h3 id="thiserror库开发者"><a class="header" href="#thiserror库开发者">thiserror（库开发者）</a></h3>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+thiserror = "1.0"
+</code></pre>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use thiserror::Error;
+
+#[derive(Error, Debug)]
+enum DataError {
+    #[error("数据不存在：{0}")]
+    NotFound(String),
+    
+    #[error("IO 错误")]
+    Io(#[from] std::io::Error),
+    
+    #[error("解析失败：{0}")]
+    Parse(#[from] std::num::ParseIntError),
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="anyhow应用开发者"><a class="header" href="#anyhow应用开发者">anyhow（应用开发者）</a></h3>
+<pre><code class="language-toml"># Cargo.toml
+[dependencies]
+anyhow = "1.0"
+</code></pre>
+<pre><pre class="playground"><code class="language-rust">use anyhow::{Context, Result};
+
+fn read_config() -&gt; Result&lt;String&gt; {
+    let path = "config.txt";
+    std::fs::read_to_string(path)
+        .with_context(|| format!("无法读取配置文件：{}", path))
+}
+
+fn main() -&gt; Result&lt;()&gt; {
+    let config = read_config()?;
+    println!("{}", config);
+    Ok(())
+}</code></pre></pre>
+<h2 id="68-实战示例"><a class="header" href="#68-实战示例">6.8 实战示例</a></h2>
+<h3 id="用户输入验证"><a class="header" href="#用户输入验证">用户输入验证</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+enum ValidationError {
+    EmptyName,
+    TooLong(String),
+    InvalidAge,
+}
+
+fn validate_user(name: &amp;str, age: u8) -&gt; Result&lt;(), ValidationError&gt; {
+    if name.is_empty() {
+        return Err(ValidationError::EmptyName);
+    }
+    
+    if name.len() &gt; 50 {
+        return Err(ValidationError::TooLong(name.to_string()));
+    }
+    
+    if age &lt; 1 || age &gt; 150 {
+        return Err(ValidationError::InvalidAge);
+    }
+    
+    Ok(())
+}
+
+fn main() {
+    match validate_user("", 25) {
+        Ok(_) =&gt; println!("验证通过"),
+        Err(e) =&gt; println!("验证失败：{:?}", e),
+    }
+}</code></pre></pre>
+<h3 id="文件操作"><a class="header" href="#文件操作">文件操作</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs::{self, File};
+use std::io::{self, Write};
+
+fn save_data(filename: &amp;str, data: &amp;str) -&gt; Result&lt;(), io::Error&gt; {
+    let mut file = File::create(filename)?;
+    file.write_all(data.as_bytes())?;
+    file.sync_all()?;
+    Ok(())
+}
+
+fn load_data(filename: &amp;str) -&gt; Result&lt;String, io::Error&gt; {
+    fs::read_to_string(filename)
+}
+
+fn main() -&gt; Result&lt;(), io::Error&gt; {
+    save_data("test.txt", "Hello, Rust!")?;
+    let data = load_data("test.txt")?;
+    println!("{}", data);
+    Ok(())
+}</code></pre></pre>
+<h2 id="69-何时使用-panic"><a class="header" href="#69-何时使用-panic">6.9 何时使用 panic</a></h2>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// ✅ 适合 panic
+fn divide(a: i32, b: i32) -&gt; i32 {
+    if b == 0 {
+        panic!("除数不能为零");  // 调用者错误
+    }
+    a / b
+}
+
+// ✅ 适合 panic
+fn get_first(v: &amp;[i32]) -&gt; i32 {
+    *v.first().expect("切片不能为空")  // 逻辑错误
+}
+
+// ❌ 应该用 Result
+fn parse_number(s: &amp;str) -&gt; Result&lt;i32, std::num::ParseIntError&gt; {
+    s.parse()  // 用户输入，预期可能失败
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="610-练习题"><a class="header" href="#610-练习题">6.10 练习题</a></h2>
+<ol>
+<li>编写函数，读取文件并返回行数，使用 ? 运算符</li>
+<li>创建自定义错误类型处理用户注册验证</li>
+<li>使用 anyhow 简化错误处理</li>
+<li>实现一个安全的除法函数，返回 Result</li>
+</ol>
+<h2 id="611-小结"><a class="header" href="#611-小结">6.11 小结</a></h2>
+<ul>
+<li>使用 <code>panic!</code> 处理不可恢复错误</li>
+<li>使用 <code>Result&lt;T, E&gt;</code> 处理可恢复错误</li>
+<li><code>?</code> 运算符简化错误传播</li>
+<li>库代码使用具体错误类型，应用代码可用 anyhow</li>
+<li>thiserror 简化自定义错误定义</li>
+<li>始终优先使用 Result 而非 panic</li>
+</ul>
+<hr />
+<p><a href="05-pattern-matching.html">上一章：模式匹配 ←</a> | <a href="07-generics-traits.html">下一章：泛型和 trait →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-7-章泛型和-trait"><a class="header" href="#第-7-章泛型和-trait">第 7 章：泛型和 trait</a></h1>
+<h2 id="71-泛型generics"><a class="header" href="#71-泛型generics">7.1 泛型（Generics）</a></h2>
+<h3 id="函数中的泛型"><a class="header" href="#函数中的泛型">函数中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">// 泛型函数
+fn largest&lt;T: PartialOrd&gt;(list: &amp;[T]) -&gt; &amp;T {
+    let mut largest = &amp;list[0];
+    
+    for item in list {
+        if item &gt; largest {
+            largest = item;
+        }
+    }
+    
+    largest
+}
+
+fn main() {
+    let numbers = vec![34, 50, 25, 100, 65];
+    println!("最大数字：{}", largest(&amp;numbers));
+    
+    let chars = vec!['y', 'm', 'a', 'q'];
+    println!("最大字符：{}", largest(&amp;chars));
+}</code></pre></pre>
+<h3 id="结构体中的泛型"><a class="header" href="#结构体中的泛型">结构体中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+fn main() {
+    let integer = Point { x: 5, y: 10 };
+    let float = Point { x: 1.0, y: 4.0 };
+}</code></pre></pre>
+<h3 id="多个泛型参数"><a class="header" href="#多个泛型参数">多个泛型参数</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T, U&gt; {
+    x: T,
+    y: U,
+}
+
+fn main() {
+    let p = Point { x: 5, y: 10.0 };  // T=i32, U=f64
+}</code></pre></pre>
+<h3 id="枚举中的泛型"><a class="header" href="#枚举中的泛型">枚举中的泛型</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Option&lt;T&gt; {
+    Some(T),
+    None,
+}
+
+enum Result&lt;T, E&gt; {
+    Ok(T),
+    Err(E),
+}
+
+fn main() {
+    let some_number: Option&lt;i32&gt; = Some(5);
+    let some_char: Option&lt;char&gt; = Some('a');
+    
+    let ok: Result&lt;i32, &amp;str&gt; = Ok(5);
+    let err: Result&lt;i32, &amp;str&gt; = Err("错误");
+}</code></pre></pre>
+<h3 id="方法实现"><a class="header" href="#方法实现">方法实现</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Point&lt;T&gt; {
+    x: T,
+    y: T,
+}
+
+impl&lt;T&gt; Point&lt;T&gt; {
+    fn x(&amp;self) -&gt; &amp;T {
+        &amp;self.x
+    }
+    
+    fn y(&amp;self) -&gt; &amp;T {
+        &amp;self.y
+    }
+}
+
+// 特定类型的实现
+impl Point&lt;f32&gt; {
+    fn distance_from_origin(&amp;self) -&gt; f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+}
+
+fn main() {
+    let p = Point { x: 3.0, y: 4.0 };
+    println!("x = {}", p.x());
+    println!("距离原点：{}", p.distance_from_origin());
+}</code></pre></pre>
+<h2 id="72-trait"><a class="header" href="#72-trait">7.2 Trait</a></h2>
+<h3 id="定义-trait"><a class="header" href="#定义-trait">定义 Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub trait Summary {
+    fn summarize(&amp;self) -&gt; String;
+    
+    // 默认实现
+    fn summary(&amp;self) -&gt; String {
+        String::from("(更多内容...)")
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="实现-trait"><a class="header" href="#实现-trait">实现 Trait</a></h3>
+<pre><pre class="playground"><code class="language-rust">pub struct NewsArticle {
+    pub headline: String,
+    pub location: String,
+    pub author: String,
+    pub content: String,
+}
+
+impl Summary for NewsArticle {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}, by {} ({})", 
+                self.headline, self.author, self.location)
+    }
+}
+
+pub struct Tweet {
+    pub username: String,
+    pub content: String,
+}
+
+impl Summary for Tweet {
+    fn summarize(&amp;self) -&gt; String {
+        format!("{}: {}", self.username, self.content)
+    }
+}
+
+fn main() {
+    let tweet = Tweet {
+        username: String::from("rustlang"),
+        content: String::from("Rust 很棒！"),
+    };
+    
+    println!("推文：{}", tweet.summarize());
+}</code></pre></pre>
+<h3 id="trait-作为参数"><a class="header" href="#trait-作为参数">Trait 作为参数</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn notify(item: &amp;impl Summary) {
+    println!("通知：{}", item.summarize());
+}
+
+// 等价于
+pub fn notify&lt;T: Summary&gt;(item: &amp;T) {
+    println!("通知：{}", item.summarize());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个-trait-约束"><a class="header" href="#多个-trait-约束">多个 Trait 约束</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// impl Trait 语法
+pub fn notify(item: &amp;(impl Summary + Display)) { }
+
+// 泛型语法
+pub fn notify&lt;T: Summary + Display&gt;(item: &amp;T) { }
+
+// where 子句（更清晰）
+pub fn notify&lt;T&gt;(item: &amp;T) 
+where 
+    T: Summary + Display 
+{
+    println!("通知：{}", item.summarize());
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="返回实现-trait-的类型"><a class="header" href="#返回实现-trait-的类型">返回实现 Trait 的类型</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn returns_summary() -&gt; impl Summary {
+    Tweet {
+        username: String::from("rustlang"),
+        content: String::from("Rust 很棒！"),
+    }
+}
+
+// 注意：只能返回单一类型
+// 不能有时返回 Tweet，有时返回 NewsArticle
+<span class="boring">}</span></code></pre></pre>
+<h3 id="条件实现"><a class="header" href="#条件实现">条件实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;T: Display&gt; Summary for Pair&lt;T&gt; {
+    fn summarize(&amp;self) -&gt; String {
+        format!("({}, {})", self.x, self.y)
+    }
+}
+
+// 仅当 T 和 U 都实现 PartialOrd 时
+impl&lt;T: PartialOrd + Display, U: PartialOrd + Display&gt; 
+    Pair&lt;T, U&gt; 
+{
+    fn cmp_display(&amp;self) {
+        if self.x &gt;= self.y {
+            println!("最大是 x = {}", self.x);
+        } else {
+            println!("最大是 y = {}", self.y);
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="73-常用标准库-trait"><a class="header" href="#73-常用标准库-trait">7.3 常用标准库 Trait</a></h2>
+<h3 id="display-和-debug"><a class="header" href="#display-和-debug">Display 和 Debug</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fmt;
+
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+// Debug: 调试输出 {:?}
+impl fmt::Debug for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        write!(f, "Point {{ x: {}, y: {} }}", self.x, self.y)
+    }
+}
+
+// Display: 用户友好输出 {}
+impl fmt::Display for Point {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter) -&gt; fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
+
+fn main() {
+    let p = Point { x: 10, y: 20 };
+    println!("{:?}", p);  // Debug
+    println!("{}", p);    // Display
+}</code></pre></pre>
+<h3 id="clone-和-copy"><a class="header" href="#clone-和-copy">Clone 和 Copy</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Clone, Debug)]
+struct Person {
+    name: String,
+    age: u32,
+}
+
+fn main() {
+    let p1 = Person {
+        name: String::from("Alice"),
+        age: 30,
+    };
+    
+    let p2 = p1.clone();  // 深拷贝
+    
+    println!("{:?}", p1);
+    println!("{:?}", p2);
+}</code></pre></pre>
+<h3 id="partialeq-和-eq"><a class="header" href="#partialeq-和-eq">PartialEq 和 Eq</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(PartialEq, Eq, Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+fn main() {
+    let rect1 = Rectangle { width: 30, height: 50 };
+    let rect2 = Rectangle { width: 30, height: 50 };
+    
+    println!("相等：{}", rect1 == rect2);
+}</code></pre></pre>
+<h3 id="default"><a class="header" href="#default">Default</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Default, Debug)]
+struct User {
+    username: String,
+    active: bool,
+}
+
+fn main() {
+    let user = User::default();
+    println!("{:?}", user);
+}</code></pre></pre>
+<h2 id="74-trait-对象"><a class="header" href="#74-trait-对象">7.4 Trait 对象</a></h2>
+<h3 id="动态分发"><a class="header" href="#动态分发">动态分发</a></h3>
+<pre><pre class="playground"><code class="language-rust">trait Draw {
+    fn draw(&amp;self);
+}
+
+struct Button {
+    label: String,
+}
+
+impl Draw for Button {
+    fn draw(&amp;self) {
+        println!("绘制按钮：{}", self.label);
+    }
+}
+
+struct TextField {
+    content: String,
+}
+
+impl Draw for TextField {
+    fn draw(&amp;self) {
+        println!("绘制文本框：{}", self.content);
+    }
+}
+
+// Trait 对象
+fn draw_screen(components: &amp;[&amp;dyn Draw]) {
+    for component in components {
+        component.draw();
+    }
+}
+
+fn main() {
+    let button = Button { label: String::from("确定") };
+    let text = TextField { content: String::from("输入...") };
+    
+    let components: Vec&lt;&amp;dyn Draw&gt; = vec![&amp;button, &amp;text];
+    draw_screen(&amp;components);
+}</code></pre></pre>
+<h3 id="box"><a class="header" href="#box">Box<dyn Trait></a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    // 存储不同类型的 Trait 对象
+    let components: Vec&lt;Box&lt;dyn Draw&gt;&gt; = vec![
+        Box::new(Button { label: String::from("确定") }),
+        Box::new(TextField { content: String::from("输入") }),
+    ];
+    
+    for component in components {
+        component.draw();
+    }
+}</code></pre></pre>
+<h2 id="75-实战示例"><a class="header" href="#75-实战示例">7.5 实战示例</a></h2>
+<h3 id="通用容器"><a class="header" href="#通用容器">通用容器</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Stack&lt;T&gt; {
+    items: Vec&lt;T&gt;,
+}
+
+impl&lt;T&gt; Stack&lt;T&gt; {
+    fn new() -&gt; Self {
+        Stack { items: Vec::new() }
+    }
+    
+    fn push(&amp;mut self, item: T) {
+        self.items.push(item);
+    }
+    
+    fn pop(&amp;mut self) -&gt; Option&lt;T&gt; {
+        self.items.pop()
+    }
+    
+    fn is_empty(&amp;self) -&gt; bool {
+        self.items.is_empty()
+    }
+}
+
+fn main() {
+    let mut int_stack = Stack::new();
+    int_stack.push(1);
+    int_stack.push(2);
+    
+    let mut string_stack = Stack::new();
+    string_stack.push(String::from("hello"));
+}</code></pre></pre>
+<h3 id="可比较类型"><a class="header" href="#可比较类型">可比较类型</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn find_max&lt;T: PartialOrd + Copy&gt;(slice: &amp;[T]) -&gt; Option&lt;T&gt; {
+    if slice.is_empty() {
+        return None;
+    }
+    
+    let mut max = slice[0];
+    for &amp;item in slice.iter() {
+        if item &gt; max {
+            max = item;
+        }
+    }
+    
+    Some(max)
+}
+
+fn main() {
+    let numbers = [3, 7, 2, 9, 1];
+    println!("最大值：{:?}", find_max(&amp;numbers));
+    
+    let chars = ['a', 'z', 'm'];
+    println!("最大字符：{:?}", find_max(&amp;chars));
+}</code></pre></pre>
+<h2 id="76-练习题"><a class="header" href="#76-练习题">7.6 练习题</a></h2>
+<ol>
+<li>创建一个泛型函数，交换两个值的位置</li>
+<li>为自定义类型实现 Display trait</li>
+<li>使用 Trait 对象创建图形渲染系统</li>
+<li>实现一个泛型的链表结构</li>
+</ol>
+<h2 id="77-小结"><a class="header" href="#77-小结">7.7 小结</a></h2>
+<ul>
+<li>泛型允许编写适用于多种类型的代码</li>
+<li>Trait 定义共享行为</li>
+<li>impl Trait 简化函数签名</li>
+<li>where 子句使复杂约束更清晰</li>
+<li>Trait 对象实现运行时多态</li>
+<li>标准库提供常用 Trait：Display, Debug, Clone, Copy 等</li>
+</ul>
+<hr />
+<p><a href="06-error-handling.html">上一章：错误处理 ←</a> | <a href="08-lifetimes.html">下一章：生命周期 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-8-章生命周期"><a class="header" href="#第-8-章生命周期">第 8 章：生命周期</a></h1>
+<h2 id="81-什么是生命周期"><a class="header" href="#81-什么是生命周期">8.1 什么是生命周期？</a></h2>
+<p>生命周期是<strong>引用的有效作用域</strong>。Rust 使用生命周期确保引用不会变成悬垂引用。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{
+    let x = 5;      // x 的生命周期开始
+    let r = &amp;x;     // r 借用 x
+    println!("{}", r);
+}                   // x 和 r 都离开作用域
+<span class="boring">}</span></code></pre></pre>
+<h2 id="82-生命周期注解"><a class="header" href="#82-生命周期注解">8.2 生命周期注解</a></h2>
+<h3 id="基本语法"><a class="header" href="#基本语法">基本语法</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// &amp;i32        - 引用
+// &amp;'a i32     - 带有生命周期的引用
+// &amp;'a mut i32 - 带有生命周期的可变引用
+<span class="boring">}</span></code></pre></pre>
+<h3 id="函数中的生命周期"><a class="header" href="#函数中的生命周期">函数中的生命周期</a></h3>
+<pre><pre class="playground"><code class="language-rust">// 错误：编译器无法推断
+// fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str {
+//     if x.len() &gt; y.len() { x } else { y }
+// }
+
+// 正确：添加生命周期注解
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+fn main() {
+    let s1 = String::from("long");
+    let s2 = String::from("short");
+    
+    let result = longest(&amp;s1, &amp;s2);
+    println!("更长的是：{}", result);
+}</code></pre></pre>
+<h3 id="生命周期含义"><a class="header" href="#生命周期含义">生命周期含义</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str
+<span class="boring">}</span></code></pre></pre>
+<p>含义：<strong>返回值的生命周期与 x 和 y 中较短的那个相同</strong></p>
+<h2 id="83-生命周期规则"><a class="header" href="#83-生命周期规则">8.3 生命周期规则</a></h2>
+<h3 id="规则-1省略规则"><a class="header" href="#规则-1省略规则">规则 1：省略规则</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 每个引用参数获得独立的生命周期
+fn first_word(s: &amp;str) -&gt; &amp;str {
+    // 实际是：fn first_word&lt;'a&gt;(s: &amp;'a str) -&gt; &amp;'a str
+    let bytes = s.as_bytes();
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+    s
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="规则-2一个输入生命周期"><a class="header" href="#规则-2一个输入生命周期">规则 2：一个输入生命周期</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 如果只有一个输入生命周期，它被赋值给所有输出
+fn first_word(s: &amp;str) -&gt; &amp;str {
+    // 输入生命周期自动赋值给输出
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="规则-3self-和-mut-self"><a class="header" href="#规则-3self-和-mut-self">规则 3：&amp;self 和 &amp;mut self</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;'a&gt; MyStruct&lt;'a&gt; {
+    // self 的生命周期自动推断
+    fn method(&amp;self) -&gt; &amp;str {
+        // ...
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="84-结构体中的生命周期"><a class="header" href="#84-结构体中的生命周期">8.4 结构体中的生命周期</a></h2>
+<pre><pre class="playground"><code class="language-rust">struct ImportantExcerpt&lt;'a&gt; {
+    part: &amp;'a str,
+}
+
+fn main() {
+    let novel = String::from("Rust 编程...");
+    let first_sentence = novel.split('.').next().unwrap();
+    
+    let excerpt = ImportantExcerpt {
+        part: first_sentence,
+    };
+    
+    println!("摘录：{}", excerpt.part);
+}</code></pre></pre>
+<h3 id="方法实现-1"><a class="header" href="#方法实现-1">方法实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;'a&gt; ImportantExcerpt&lt;'a&gt; {
+    fn level(&amp;self) -&gt; i32 {
+        3
+    }
+    
+    fn announce_and_return_part(&amp;self, announcement: &amp;str) -&gt; &amp;str {
+        println!("通知：{}", announcement);
+        self.part
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="85-静态生命周期"><a class="header" href="#85-静态生命周期">8.5 静态生命周期</a></h2>
+<pre><pre class="playground"><code class="language-rust">// 'static: 程序整个运行期间都有效
+let s: &amp;'static str = "字符串字面量";
+
+// 所有字符串字面量都有 'static 生命周期
+fn main() {
+    let greeting = "Hello";  // &amp;'static str
+}
+
+// 注意：'static 不意味着"永远"，而是"程序运行期间"</code></pre></pre>
+<h2 id="86-生命周期约束"><a class="header" href="#86-生命周期约束">8.6 生命周期约束</a></h2>
+<h3 id="约束语法"><a class="header" href="#约束语法">约束语法</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// T 必须存活至少 'a 这么久
+fn process&lt;T&gt;(data: &amp;'a T) 
+where 
+    T: 'a + Display 
+{
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个约束"><a class="header" href="#多个约束">多个约束</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process&lt;T, U&gt;(t: &amp;'a T, u: &amp;'b U) 
+where 
+    T: 'a + Display,
+    U: 'b + Debug,
+    'a: 'b,  // 'a 至少和 'b 一样长
+{
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="87-复杂示例"><a class="header" href="#87-复杂示例">8.7 复杂示例</a></h2>
+<h3 id="返回引用的结构体方法"><a class="header" href="#返回引用的结构体方法">返回引用的结构体方法</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Parser&lt;'a&gt; {
+    input: &amp;'a str,
+}
+
+impl&lt;'a&gt; Parser&lt;'a&gt; {
+    fn new(input: &amp;'a str) -&gt; Self {
+        Parser { input }
+    }
+    
+    fn parse(&amp;self) -&gt; &amp;'a str {
+        self.input.trim()
+    }
+}
+
+fn main() {
+    let text = String::from("  hello  ");
+    let parser = Parser::new(&amp;text);
+    let result = parser.parse();
+    println!("解析结果：{}", result);
+}</code></pre></pre>
+<h3 id="持有引用的枚举"><a class="header" href="#持有引用的枚举">持有引用的枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Cow&lt;'a&gt; {
+    Borrowed(&amp;'a str),
+    Owned(String),
+}
+
+impl&lt;'a&gt; Cow&lt;'a&gt; {
+    fn to_owned(&amp;self) -&gt; Cow&lt;'a&gt; {
+        match self {
+            Cow::Borrowed(s) =&gt; Cow::Owned(s.to_string()),
+            Cow::Owned(s) =&gt; Cow::Owned(s.clone()),
+        }
+    }
+}
+
+fn main() {
+    let borrowed = Cow::Borrowed("hello");
+    let owned = borrowed.to_owned();
+}</code></pre></pre>
+<h2 id="88-生命周期和闭包"><a class="header" href="#88-生命周期和闭包">8.8 生命周期和闭包</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn make_closure&lt;'a&gt;(x: &amp;'a i32) -&gt; impl Fn() -&gt; i32 + 'a {
+    move || *x
+}
+
+fn main() {
+    let num = 5;
+    let closure = make_closure(&amp;num);
+    println!("{}", closure());
+}</code></pre></pre>
+<h2 id="89-常见模式"><a class="header" href="#89-常见模式">8.9 常见模式</a></h2>
+<h3 id="迭代器"><a class="header" href="#迭代器">迭代器</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process_items(items: &amp;[i32]) {
+    for item in items.iter() {
+        println!("{}", item);
+    }
+}
+
+// 或
+fn process_items&lt;'a&gt;(items: &amp;'a [i32]) {
+    for item in items {
+        println!("{}", item);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="切片"><a class="header" href="#切片">切片</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn first_element(slice: &amp;[i32]) -&gt; Option&lt;&amp;i32&gt; {
+    slice.first()
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个引用"><a class="header" href="#多个引用">多个引用</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn select&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="810-实战示例"><a class="header" href="#810-实战示例">8.10 实战示例</a></h2>
+<h3 id="缓存系统"><a class="header" href="#缓存系统">缓存系统</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Cache&lt;'a&gt; {
+    data: &amp;'a str,
+    cached_result: Option&lt;String&gt;,
+}
+
+impl&lt;'a&gt; Cache&lt;'a&gt; {
+    fn new(data: &amp;'a str) -&gt; Self {
+        Cache {
+            data,
+            cached_result: None,
+        }
+    }
+    
+    fn get_result(&amp;mut self) -&gt; &amp;str {
+        if self.cached_result.is_none() {
+            self.cached_result = Some(self.data.to_uppercase());
+        }
+        self.cached_result.as_ref().unwrap()
+    }
+}
+
+fn main() {
+    let text = String::from("hello");
+    let mut cache = Cache::new(&amp;text);
+    println!("{}", cache.get_result());
+}</code></pre></pre>
+<h3 id="配置解析器"><a class="header" href="#配置解析器">配置解析器</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Config&lt;'a&gt; {
+    raw: &amp;'a str,
+}
+
+impl&lt;'a&gt; Config&lt;'a&gt; {
+    fn new(raw: &amp;'a str) -&gt; Self {
+        Config { raw }
+    }
+    
+    fn get(&amp;self, key: &amp;str) -&gt; Option&lt;&amp;'a str&gt; {
+        for line in self.raw.lines() {
+            if line.starts_with(key) {
+                return Some(line.split('=').nth(1)?.trim());
+            }
+        }
+        None
+    }
+}
+
+fn main() {
+    let config_text = "host=localhost\nport=8080";
+    let config = Config::new(config_text);
+    println!("host: {:?}", config.get("host"));
+}</code></pre></pre>
+<h2 id="811-调试生命周期错误"><a class="header" href="#811-调试生命周期错误">8.11 调试生命周期错误</a></h2>
+<h3 id="常见错误"><a class="header" href="#常见错误">常见错误</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误：返回局部变量的引用
+// fn dangling() -&gt; &amp;i32 {
+//     let x = 5;
+//     &amp;x  // x 在函数结束时被释放
+// }
+
+// 正确：返回所有权
+fn not_dangling() -&gt; i32 {
+    let x = 5;
+    x
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="生命周期不匹配"><a class="header" href="#生命周期不匹配">生命周期不匹配</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误
+// fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;str) -&gt; &amp;'a str {
+//     x  // y 没有生命周期注解
+// }
+
+// 正确
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="812-练习题"><a class="header" href="#812-练习题">8.12 练习题</a></h2>
+<ol>
+<li>为持有字符串切片的结构体添加生命周期</li>
+<li>编写函数返回两个切片中较长的一个</li>
+<li>解释为什么某些函数不需要显式生命周期注解</li>
+<li>创建持有多个引用的结构体</li>
+</ol>
+<h2 id="813-小结"><a class="header" href="#813-小结">8.13 小结</a></h2>
+<ul>
+<li>生命周期确保引用始终有效</li>
+<li>使用 <code>'a</code> 等标注生命周期</li>
+<li>编译器有省略规则，多数情况不需要显式标注</li>
+<li>结构体持有引用时需要生命周期参数</li>
+<li><code>'static</code> 表示程序运行期间都有效</li>
+<li>生命周期是编译时检查，无运行时开销</li>
+</ul>
+<hr />
+<p><a href="07-generics-traits.html">上一章：泛型和 trait ←</a> | <a href="09-concurrency.html">下一章：并发编程 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-9-章并发编程"><a class="header" href="#第-9-章并发编程">第 9 章：并发编程</a></h1>
+<h2 id="91-线程基础"><a class="header" href="#91-线程基础">9.1 线程基础</a></h2>
+<h3 id="创建线程"><a class="header" href="#创建线程">创建线程</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..5 {
+            println!("子线程：{}", i);
+            thread::sleep(Duration::from_millis(100));
+        }
+    });
+    
+    for i in 1..5 {
+        println!("主线程：{}", i);
+        thread::sleep(Duration::from_millis(100));
+    }
+    
+    // 等待子线程完成
+    handle.join().unwrap();
+}</code></pre></pre>
+<h3 id="move-关键字"><a class="header" href="#move-关键字">move 关键字</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::thread;
+
+fn main() {
+    let vec = vec![1, 2, 3];
+    
+    // 错误：vec 可能被主线程释放
+    // let handle = thread::spawn(|| {
+    //     println!("{:?}", vec);
+    // });
+    
+    // 正确：使用 move 转移所有权
+    let handle = thread::spawn(move || {
+        println!("{:?}", vec);
+    });
+    
+    handle.join().unwrap();
+}</code></pre></pre>
+<h2 id="92-消息传递"><a class="header" href="#92-消息传递">9.2 消息传递</a></h2>
+<h3 id="通道channel"><a class="header" href="#通道channel">通道（Channel）</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+    
+    thread::spawn(move || {
+        let msg = String::from("你好");
+        tx.send(msg).unwrap();
+        // msg 已被移动，不能再使用
+    });
+    
+    let received = rx.recv().unwrap();
+    println!("收到：{}", received);
+}</code></pre></pre>
+<h3 id="发送多个消息"><a class="header" href="#发送多个消息">发送多个消息</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+    
+    thread::spawn(move || {
+        let messages = vec![
+            String::from("消息 1"),
+            String::from("消息 2"),
+            String::from("消息 3"),
+        ];
+        
+        for msg in messages {
+            tx.send(msg).unwrap();
+            thread::sleep(Duration::from_millis(200));
+        }
+    });
+    
+    // 接收所有消息
+    for received in rx {
+        println!("收到：{}", received);
+    }
+}</code></pre></pre>
+<h3 id="多生产者"><a class="header" href="#多生产者">多生产者</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+    let tx2 = tx.clone();  // 克隆发送者
+    
+    thread::spawn(move || {
+        for i in 1..5 {
+            tx.send(format!("线程 1: {}", i)).unwrap();
+            thread::sleep(Duration::from_millis(100));
+        }
+    });
+    
+    thread::spawn(move || {
+        for i in 1..5 {
+            tx2.send(format!("线程 2: {}", i)).unwrap();
+            thread::sleep(Duration::from_millis(100));
+        }
+    });
+    
+    for received in rx {
+        println!("收到：{}", received);
+    }
+}</code></pre></pre>
+<h2 id="93-共享状态"><a class="header" href="#93-共享状态">9.3 共享状态</a></h2>
+<h3 id="mutex"><a class="header" href="#mutex">Mutex</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::Mutex;
+
+fn main() {
+    let m = Mutex::new(5);
+    
+    {
+        let mut num = m.lock().unwrap();
+        *num = 6;
+    }  // 锁在此释放
+    
+    println!("m = {:?}", m);
+}</code></pre></pre>
+<h3 id="arc原子引用计数"><a class="header" href="#arc原子引用计数">Arc（原子引用计数）</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::{Arc, Mutex};
+use std::thread;
+
+fn main() {
+    let counter = Arc::new(Mutex::new(0));
+    let mut handles = vec![];
+    
+    for _ in 0..10 {
+        let counter = Arc::clone(&amp;counter);
+        
+        let handle = thread::spawn(move || {
+            let mut num = counter.lock().unwrap();
+            *num += 1;
+        });
+        
+        handles.push(handle);
+    }
+    
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    
+    println!("结果：{}", *counter.lock().unwrap());
+}</code></pre></pre>
+<h3 id="arc-vs-rc"><a class="header" href="#arc-vs-rc">Arc vs Rc</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Rc: 单线程引用计数
+use std::rc::Rc;
+
+// Arc: 多线程原子引用计数
+use std::sync::Arc;
+
+// 线程间共享用 Arc，单线程用 Rc
+<span class="boring">}</span></code></pre></pre>
+<h2 id="94-并发原语"><a class="header" href="#94-并发原语">9.4 并发原语</a></h2>
+<h3 id="rwlock读写锁"><a class="header" href="#rwlock读写锁">RwLock（读写锁）</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::{Arc, RwLock};
+use std::thread;
+
+fn main() {
+    let data = Arc::new(RwLock::new(5));
+    
+    // 多个读锁
+    let data1 = Arc::clone(&amp;data);
+    let handle1 = thread::spawn(move || {
+        let read = data1.read().unwrap();
+        println!("读：{}", *read);
+    });
+    
+    let data2 = Arc::clone(&amp;data);
+    let handle2 = thread::spawn(move || {
+        let read = data2.read().unwrap();
+        println!("读：{}", *read);
+    });
+    
+    // 一个写锁
+    let data3 = Arc::clone(&amp;data);
+    let handle3 = thread::spawn(move || {
+        let mut write = data3.write().unwrap();
+        *write += 1;
+    });
+    
+    handle1.join().unwrap();
+    handle2.join().unwrap();
+    handle3.join().unwrap();
+}</code></pre></pre>
+<h3 id="once"><a class="header" href="#once">Once</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::Once;
+
+static INIT: Once = Once::new();
+static mut VALUE: Option&lt;String&gt; = None;
+
+fn init() {
+    INIT.call_once(|| {
+        unsafe {
+            VALUE = Some(String::from("初始化"));
+        }
+    });
+}
+
+fn main() {
+    init();
+    init();  // 不会再次执行
+    
+    unsafe {
+        println!("{:?}", VALUE);
+    }
+}</code></pre></pre>
+<h2 id="95-原子类型"><a class="header" href="#95-原子类型">9.5 原子类型</a></h2>
+<pre><pre class="playground"><code class="language-rust">use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::Arc;
+use std::thread;
+
+fn main() {
+    let counter = Arc::new(AtomicUsize::new(0));
+    let mut handles = vec![];
+    
+    for _ in 0..10 {
+        let counter = Arc::clone(&amp;counter);
+        
+        let handle = thread::spawn(move || {
+            counter.fetch_add(1, Ordering::SeqCst);
+        });
+        
+        handles.push(handle);
+    }
+    
+    for handle in handles {
+        handle.join().unwrap();
+    }
+    
+    println!("计数：{}", counter.load(Ordering::SeqCst));
+}</code></pre></pre>
+<h3 id="ordering-类型"><a class="header" href="#ordering-类型">Ordering 类型</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::atomic::Ordering;
+
+// Relaxed: 无顺序保证
+// Acquire: 获取语义
+// Release: 释放语义
+// AcqRel: 获取 + 释放
+// SeqCst: 顺序一致（默认，最安全）
+<span class="boring">}</span></code></pre></pre>
+<h2 id="96-智能并发类型"><a class="header" href="#96-智能并发类型">9.6 智能并发类型</a></h2>
+<h3 id="senderreceiver-模式"><a class="header" href="#senderreceiver-模式">Sender/Receiver 模式</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::sync::mpsc;
+use std::thread;
+
+enum Message {
+    Quit,
+    Write(String),
+    ChangeColor(u8, u8, u8),
+}
+
+fn main() {
+    let (tx, rx) = mpsc::channel();
+    
+    thread::spawn(move || {
+        tx.send(Message::Write(String::from("hello"))).unwrap();
+        tx.send(Message::ChangeColor(255, 0, 0)).unwrap();
+        tx.send(Message::Quit).unwrap();
+    });
+    
+    for msg in rx {
+        match msg {
+            Message::Write(text) =&gt; println!("文本：{}", text),
+            Message::ChangeColor(r, g, b) =&gt; {
+                println!("颜色：RGB({}, {}, {})", r, g, b)
+            },
+            Message::Quit =&gt; break,
+        }
+    }
+}</code></pre></pre>
+<h2 id="97-实战示例"><a class="header" href="#97-实战示例">9.7 实战示例</a></h2>
+<h3 id="线程池"><a class="header" href="#线程池">线程池</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use std::sync::{mpsc, Arc, Mutex};
+use std::thread;
+
+struct ThreadPool {
+    workers: Vec&lt;Worker&gt;,
+    sender: Option&lt;mpsc::Sender&lt;Job&gt;&gt;,
+}
+
+type Job = Box&lt;dyn FnOnce() + Send + 'static&gt;;
+
+struct Worker {
+    id: usize,
+    thread: Option&lt;thread::JoinHandle&lt;()&gt;&gt;,
+}
+
+impl ThreadPool {
+    fn new(size: usize) -&gt; ThreadPool {
+        let (sender, receiver) = mpsc::channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+        
+        let mut workers = Vec::with_capacity(size);
+        
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&amp;receiver)));
+        }
+        
+        ThreadPool {
+            workers,
+            sender: Some(sender),
+        }
+    }
+    
+    fn execute&lt;F&gt;(&amp;self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let job = Box::new(f);
+        self.sender.as_ref().unwrap().send(job).unwrap();
+    }
+}
+
+impl Worker {
+    fn new(id: usize, receiver: Arc&lt;Mutex&lt;mpsc::Receiver&lt;Job&gt;&gt;&gt;) -&gt; Worker {
+        let thread = thread::spawn(move || {
+            loop {
+                let job = receiver.lock().unwrap().recv();
+                
+                match job {
+                    Ok(job) =&gt; {
+                        println!("Worker {} 执行任务", id);
+                        job();
+                    },
+                    Err(_) =&gt; {
+                        println!("Worker {} 断开", id);
+                        break;
+                    },
+                }
+            }
+        });
+        
+        Worker {
+            id,
+            thread: Some(thread),
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="并行计算"><a class="header" href="#并行计算">并行计算</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::thread;
+
+fn parallel_map&lt;T, U, F&gt;(data: Vec&lt;T&gt;, f: F) -&gt; Vec&lt;U&gt;
+where
+    T: Send + 'static,
+    U: Send + 'static,
+    F: Fn(T) -&gt; U + Send + Sync + 'static,
+{
+    let chunk_size = data.len() / 4 + 1;
+    let chunks: Vec&lt;_&gt; = data.chunks(chunk_size).map(|c| c.to_vec()).collect();
+    
+    let mut handles = vec![];
+    
+    for chunk in chunks {
+        let f = &amp;f;
+        let handle = thread::spawn(move || {
+            chunk.into_iter().map(f).collect::&lt;Vec&lt;_&gt;&gt;()
+        });
+        handles.push(handle);
+    }
+    
+    handles.into_iter()
+        .flat_map(|h| h.join().unwrap())
+        .collect()
+}
+
+fn main() {
+    let data: Vec&lt;i32&gt; = (0..100).collect();
+    let result = parallel_map(data, |x| x * 2);
+    println!("{:?}", &amp;result[..10]);
+}</code></pre></pre>
+<h2 id="98-并发安全"><a class="header" href="#98-并发安全">9.8 并发安全</a></h2>
+<h3 id="send-和-sync"><a class="header" href="#send-和-sync">Send 和 Sync</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Send: 可以安全地在线程间转移所有权
+// Sync: 可以安全地在多个线程中引用 (&amp;T)
+
+// 大多数类型自动实现 Send 和 Sync
+// 例外：Rc 不实现 Send，原始指针不实现 Send/Sync
+<span class="boring">}</span></code></pre></pre>
+<h3 id="数据竞争"><a class="header" href="#数据竞争">数据竞争</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 数据竞争的条件：
+// 1. 两个或多个指针访问同一数据
+// 2. 至少一个是写操作
+// 3. 没有同步机制
+
+// Rust 在编译时防止数据竞争
+<span class="boring">}</span></code></pre></pre>
+<h2 id="99-练习题"><a class="header" href="#99-练习题">9.9 练习题</a></h2>
+<ol>
+<li>创建两个线程，一个打印偶数，一个打印奇数</li>
+<li>使用 Mutex 和 Arc 实现线程安全的计数器</li>
+<li>使用通道实现生产者 - 消费者模式</li>
+<li>实现简单的线程池</li>
+</ol>
+<h2 id="910-小结"><a class="header" href="#910-小结">9.10 小结</a></h2>
+<ul>
+<li>使用 <code>thread::spawn</code> 创建线程</li>
+<li>使用 <code>join</code> 等待线程完成</li>
+<li>通道（channel）用于线程间消息传递</li>
+<li>Mutex + Arc 实现共享状态</li>
+<li>原子类型提供无锁并发</li>
+<li>Rust 在编译时保证线程安全</li>
+</ul>
+<hr />
+<p><a href="08-lifetimes.html">上一章：生命周期 ←</a> | <a href="10-project.html">下一章：实战项目 →</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="第-10-章实战项目"><a class="header" href="#第-10-章实战项目">第 10 章：实战项目</a></h1>
+<h2 id="101-项目一命令行工具"><a class="header" href="#101-项目一命令行工具">10.1 项目一：命令行工具</a></h2>
+<h3 id="grep-实现"><a class="header" href="#grep-实现">grep 实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[package]
+name = "minigrep"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use std::env;
+use std::fs;
+use std::process;
+
+struct Config {
+    query: String,
+    filename: String,
+    case_sensitive: bool,
+}
+
+impl Config {
+    fn new(args: &amp;[String]) -&gt; Result&lt;Config, &amp;'static str&gt; {
+        if args.len() &lt; 3 {
+            return Err("参数不足");
+        }
+        
+        let query = args[1].clone();
+        let filename = args[2].clone();
+        let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
+        
+        Ok(Config {
+            query,
+            filename,
+            case_sensitive,
+        })
+    }
+}
+
+fn run(config: Config) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let contents = fs::read_to_string(&amp;config.filename)?;
+    
+    let results = if config.case_sensitive {
+        search(&amp;config.query, &amp;contents)
+    } else {
+        search_case_insensitive(&amp;config.query, &amp;contents)
+    };
+    
+    for line in results {
+        println!("{}", line);
+    }
+    
+    Ok(())
+}
+
+fn search&lt;'a&gt;(query: &amp;str, contents: &amp;'a str) -&gt; Vec&lt;&amp;'a str&gt; {
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
+}
+
+fn search_case_insensitive&lt;'a&gt;(
+    query: &amp;str,
+    contents: &amp;'a str,
+) -&gt; Vec&lt;&amp;'a str&gt; {
+    let query = query.to_lowercase();
+    
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&amp;query))
+        .collect()
+}
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    
+    let config = Config::new(&amp;args).unwrap_or_else(|err| {
+        eprintln!("参数错误：{}", err);
+        process::exit(1);
+    });
+    
+    if let Err(e) = run(config) {
+        eprintln!("程序错误：{}", e);
+        process::exit(1);
+    }
+}</code></pre></pre>
+<h3 id="使用示例"><a class="header" href="#使用示例">使用示例</a></h3>
+<pre><code class="language-bash">$ cargo run -- to search poem.txt
+在诗中寻找 "to"
+
+$ CASE_INSENSITIVE=1 cargo run -- to search poem.txt
+不区分大小写搜索
+</code></pre>
+<h2 id="102-项目二web-服务器"><a class="header" href="#102-项目二web-服务器">10.2 项目二：Web 服务器</a></h2>
+<h3 id="基础服务器"><a class="header" href="#基础服务器">基础服务器</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[package]
+name = "web_server"
+version = "0.1.0"
+edition = "2021"
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use std::fs;
+use std::io::{prelude::*, BufReader};
+use std::net::{TcpListener, TcpStream};
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let listener = TcpListener::bind("127.0.0.1:7878").unwrap();
+    
+    println!("服务器运行在 http://127.0.0.1:7878");
+    
+    for stream in listener.incoming() {
+        let stream = stream.unwrap();
+        
+        thread::spawn(|| {
+            handle_connection(stream);
+        });
+    }
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    let buf_reader = BufReader::new(&amp;mut stream);
+    let http_request: Vec&lt;_&gt; = buf_reader
+        .lines()
+        .map(|result| result.unwrap())
+        .take_while(|line| !line.is_empty())
+        .collect();
+    
+    let (status_line, filename) = match &amp;http_request[..] {
+        ["GET /", ..] =&gt; ("HTTP/1.1 200 OK", "hello.html"),
+        ["GET /sleep", ..] =&gt; {
+            thread::sleep(Duration::from_secs(5));
+            ("HTTP/1.1 200 OK", "hello.html")
+        },
+        _ =&gt; ("HTTP/1.1 404 NOT FOUND", "404.html"),
+    };
+    
+    let contents = fs::read_to_string(filename).unwrap_or_default();
+    
+    let response = format!(
+        "{}\r\nContent-Length: {}\r\n\r\n{}",
+        status_line,
+        contents.len(),
+        contents
+    );
+    
+    stream.write_all(response.as_bytes()).unwrap();
+}</code></pre></pre>
+<h3 id="线程池版本"><a class="header" href="#线程池版本">线程池版本</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+pub struct ThreadPool {
+    workers: Vec&lt;Worker&gt;,
+    sender: Option&lt;mpsc::Sender&lt;Job&gt;&gt;,
+}
+
+type Job = Box&lt;dyn FnOnce() + Send + 'static&gt;;
+
+impl ThreadPool {
+    pub fn new(size: usize) -&gt; ThreadPool {
+        assert!(size &gt; 0);
+        
+        let (sender, receiver) = mpsc::channel();
+        let receiver = Arc::new(Mutex::new(receiver));
+        
+        let mut workers = Vec::with_capacity(size);
+        
+        for id in 0..size {
+            workers.push(Worker::new(id, Arc::clone(&amp;receiver)));
+        }
+        
+        ThreadPool {
+            workers,
+            sender: Some(sender),
+        }
+    }
+    
+    pub fn execute&lt;F&gt;(&amp;self, f: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        let job = Box::new(f);
+        self.sender.as_ref().unwrap().send(job).unwrap();
+    }
+}
+
+impl Drop for ThreadPool {
+    fn drop(&amp;mut self) {
+        drop(self.sender.take());
+        
+        for worker in &amp;mut self.workers {
+            println!("关闭 Worker {}", worker.id);
+            
+            if let Some(thread) = worker.thread.take() {
+                thread.join().unwrap();
+            }
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="103-项目三待办事项-cli"><a class="header" href="#103-项目三待办事项-cli">10.3 项目三：待办事项 CLI</a></h2>
+<h3 id="数据结构"><a class="header" href="#数据结构">数据结构</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// src/lib.rs
+use serde::{Deserialize, Serialize};
+use std::fs;
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Todo {
+    id: u64,
+    title: String,
+    completed: bool,
+}
+
+#[derive(Default)]
+pub struct TodoList {
+    todos: Vec&lt;Todo&gt;,
+    next_id: u64,
+}
+
+impl TodoList {
+    pub fn new() -&gt; Self {
+        TodoList {
+            todos: Vec::new(),
+            next_id: 1,
+        }
+    }
+    
+    pub fn load(path: &amp;str) -&gt; Result&lt;Self, Box&lt;dyn std::error::Error&gt;&gt; {
+        let contents = fs::read_to_string(path)?;
+        let todos: Vec&lt;Todo&gt; = serde_json::from_str(&amp;contents)?;
+        let next_id = todos.iter().map(|t| t.id).max().unwrap_or(0) + 1;
+        
+        Ok(TodoList { todos, next_id })
+    }
+    
+    pub fn save(&amp;self, path: &amp;str) -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+        let contents = serde_json::to_string_pretty(&amp;self.todos)?;
+        fs::write(path, contents)?;
+        Ok(())
+    }
+    
+    pub fn add(&amp;mut self, title: String) -&gt; &amp;Todo {
+        let todo = Todo {
+            id: self.next_id,
+            title,
+            completed: false,
+        };
+        self.next_id += 1;
+        self.todos.push(todo);
+        self.todos.last().unwrap()
+    }
+    
+    pub fn complete(&amp;mut self, id: u64) -&gt; Option&lt;&amp;Todo&gt; {
+        self.todos
+            .iter_mut()
+            .find(|t| t.id == id)
+            .map(|t| {
+                t.completed = true;
+                t
+            })
+    }
+    
+    pub fn list(&amp;self) -&gt; &amp;[Todo] {
+        &amp;self.todos
+    }
+    
+    pub fn remove(&amp;mut self, id: u64) -&gt; Option&lt;Todo&gt; {
+        if let Some(pos) = self.todos.iter().position(|t| t.id == id) {
+            Some(self.todos.remove(pos))
+        } else {
+            None
+        }
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="命令行界面"><a class="header" href="#命令行界面">命令行界面</a></h3>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use todo_lib::TodoList;
+use std::env;
+
+fn main() {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    let mut todo_list = TodoList::load("todos.json")
+        .unwrap_or_else(|_| TodoList::new());
+    
+    match args.get(1).map(|s| s.as_str()) {
+        Some("add") =&gt; {
+            let title = args.get(2).unwrap_or_else(|| {
+                eprintln!("请提供标题");
+                std::process::exit(1);
+            });
+            let todo = todo_list.add(title.clone());
+            println!("添加：{} (ID: {})", todo.title, todo.id);
+        },
+        Some("list") =&gt; {
+            for todo in todo_list.list() {
+                let status = if todo.completed { "✓" } else { " " };
+                println!("[{}] {}: {}", status, todo.id, todo.title);
+            }
+        },
+        Some("complete") =&gt; {
+            let id: u64 = args.get(2)
+                .and_then(|s| s.parse().ok())
+                .unwrap_or_else(|| {
+                    eprintln!("请提供有效的 ID");
+                    std::process::exit(1);
+                });
+            
+            if let Some(todo) = todo_list.complete(id) {
+                println!("完成：{}", todo.title);
+            } else {
+                eprintln!("未找到 ID: {}", id);
+            }
+        },
+        Some("remove") =&gt; {
+            let id: u64 = args.get(2)
+                .and_then(|s| s.parse().ok())
+                .unwrap_or_else(|| {
+                    eprintln!("请提供有效的 ID");
+                    std::process::exit(1);
+                });
+            
+            if let Some(todo) = todo_list.remove(id) {
+                println!("移除：{}", todo.title);
+            } else {
+                eprintln!("未找到 ID: {}", id);
+            }
+        },
+        _ =&gt; {
+            eprintln!("用法:");
+            eprintln!("  todo add &lt;标题&gt;     添加待办");
+            eprintln!("  todo list           列出待办");
+            eprintln!("  todo complete &lt;ID&gt;  完成待办");
+            eprintln!("  todo remove &lt;ID&gt;    删除待办");
+        },
+    }
+    
+    todo_list.save("todos.json").unwrap();
+}</code></pre></pre>
+<h3 id="使用示例-1"><a class="header" href="#使用示例-1">使用示例</a></h3>
+<pre><code class="language-bash">$ cargo run -- add "学习 Rust"
+添加：学习 Rust (ID: 1)
+
+$ cargo run -- add "写代码"
+添加：写代码 (ID: 2)
+
+$ cargo run -- list
+[ ] 1: 学习 Rust
+[ ] 2: 写代码
+
+$ cargo run -- complete 1
+完成：学习 Rust
+
+$ cargo run -- list
+[✓] 1: 学习 Rust
+[ ] 2: 写代码
+</code></pre>
+<h2 id="104-项目四api-客户端"><a class="header" href="#104-项目四api-客户端">10.4 项目四：API 客户端</a></h2>
+<h3 id="http-客户端"><a class="header" href="#http-客户端">HTTP 客户端</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// Cargo.toml
+[dependencies]
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+<span class="boring">}</span></code></pre></pre>
+<pre><pre class="playground"><code class="language-rust">// src/main.rs
+use reqwest::blocking::Client;
+use serde::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize, Debug)]
+struct Post {
+    userId: u32,
+    id: Option&lt;u32&gt;,
+    title: String,
+    body: String,
+}
+
+fn main() -&gt; Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt; {
+    let client = Client::new();
+    
+    // GET 请求
+    let response = client
+        .get("https://jsonplaceholder.typicode.com/posts/1")
+        .send()?;
+    
+    let post: Post = response.json()?;
+    println!("获取帖子：{:?}", post);
+    
+    // POST 请求
+    let new_post = Post {
+        userId: 1,
+        id: None,
+        title: "我的帖子".to_string(),
+        body: "这是内容".to_string(),
+    };
+    
+    let response = client
+        .post("https://jsonplaceholder.typicode.com/posts")
+        .json(&amp;new_post)
+        .send()?;
+    
+    let created: Post = response.json()?;
+    println!("创建帖子：{:?}", created);
+    
+    Ok(())
+}</code></pre></pre>
+<h2 id="105-项目五文件处理器"><a class="header" href="#105-项目五文件处理器">10.5 项目五：文件处理器</a></h2>
+<h3 id="并行文件处理"><a class="header" href="#并行文件处理">并行文件处理</a></h3>
+<pre><pre class="playground"><code class="language-rust">use std::fs;
+use std::io::{self, BufRead, Write};
+use std::path::Path;
+use std::thread;
+
+fn process_file(path: &amp;str) -&gt; io::Result&lt;usize&gt; {
+    let file = fs::File::open(path)?;
+    let reader = io::BufReader::new(file);
+    
+    let mut line_count = 0;
+    for line in reader.lines() {
+        let _ = line?;
+        line_count += 1;
+    }
+    
+    Ok(line_count)
+}
+
+fn parallel_process(paths: Vec&lt;String&gt;) -&gt; Vec&lt;io::Result&lt;usize&gt;&gt; {
+    let mut handles = vec![];
+    
+    for path in paths {
+        let handle = thread::spawn(move || {
+            process_file(&amp;path)
+        });
+        handles.push(handle);
+    }
+    
+    handles.into_iter()
+        .map(|h| h.join().unwrap())
+        .collect()
+}
+
+fn main() -&gt; io::Result&lt;()&gt; {
+    let files = vec![
+        "file1.txt".to_string(),
+        "file2.txt".to_string(),
+        "file3.txt".to_string(),
+    ];
+    
+    let results = parallel_process(files);
+    
+    for (i, result) in results.iter().enumerate() {
+        match result {
+            Ok(count) =&gt; println!("文件 {}: {} 行", i + 1, count),
+            Err(e) =&gt; println!("文件 {} 错误：{}", i + 1, e),
+        }
+    }
+    
+    Ok(())
+}</code></pre></pre>
+<h2 id="106-最佳实践"><a class="header" href="#106-最佳实践">10.6 最佳实践</a></h2>
+<h3 id="项目结构"><a class="header" href="#项目结构">项目结构</a></h3>
+<pre><code>my_project/
+├── Cargo.toml
+├── Cargo.lock
+├── src/
+│   ├── main.rs      # 程序入口
+│   ├── lib.rs       # 库代码
+│   ├── bin/         # 多个二进制文件
+│   ├── modules/     # 模块
+│   └── utils.rs     # 工具函数
+├── tests/           # 集成测试
+├── benches/         # 基准测试
+└── examples/        # 示例代码
+</code></pre>
+<h3 id="代码组织"><a class="header" href="#代码组织">代码组织</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 良好的模块结构
+mod config;
+mod database;
+mod handlers;
+mod models;
+mod utils;
+
+use config::Config;
+use database::Database;
+use handlers::RequestHandler;
+<span class="boring">}</span></code></pre></pre>
+<h3 id="测试"><a class="header" href="#测试">测试</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_add() {
+        let mut list = TodoList::new();
+        let todo = list.add("test".to_string());
+        assert_eq!(todo.title, "test");
+        assert!(!todo.completed);
+    }
+    
+    #[test]
+    fn test_complete() {
+        let mut list = TodoList::new();
+        list.add("test".to_string());
+        list.complete(1);
+        assert!(list.list()[0].completed);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="107-下一步"><a class="header" href="#107-下一步">10.7 下一步</a></h2>
+<h3 id="进阶主题"><a class="header" href="#进阶主题">进阶主题</a></h3>
+<ul>
+<li>异步编程（async/await）</li>
+<li>宏编程（macro）</li>
+<li>FFI（与其他语言交互）</li>
+<li>性能优化</li>
+<li>嵌入式 Rust</li>
+</ul>
+<h3 id="学习资源"><a class="header" href="#学习资源">学习资源</a></h3>
+<ul>
+<li><a href="https://doc.rust-lang.org/book/">The Rust Programming Language</a></li>
+<li><a href="https://doc.rust-lang.org/rust-by-example/">Rust by Example</a></li>
+<li><a href="https://github.com/rust-lang/rustlings">Rustlings</a></li>
+<li><a href="https://www.arewewebyet.org/">Are we web yet?</a></li>
+</ul>
+<h2 id="108-总结"><a class="header" href="#108-总结">10.8 总结</a></h2>
+<p>恭喜你完成了 Rust 学习小册！你已经掌握了：</p>
+<ul>
+<li>✅ Rust 基础语法和所有权系统</li>
+<li>✅ 结构体、枚举和模式匹配</li>
+<li>✅ 错误处理和泛型</li>
+<li>✅ 生命周期和并发编程</li>
+<li>✅ 实际项目开发</li>
+</ul>
+<p>继续实践，参与开源项目，Rust 社区欢迎你！🦀</p>
+<hr />
+<p><a href="09-concurrency.html">上一章：并发编程 ←</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

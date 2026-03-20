@@ -1,0 +1,587 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>第 4 章：结构体和枚举 - Rust 学习小册</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html" class="active"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book/edit/main/src/ch04-structs-enums.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-4-章结构体和枚举"><a class="header" href="#第-4-章结构体和枚举">第 4 章：结构体和枚举</a></h1>
+<h2 id="41-结构体struct"><a class="header" href="#41-结构体struct">4.1 结构体（Struct）</a></h2>
+<h3 id="定义结构体"><a class="header" href="#定义结构体">定义结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+fn main() {
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+    
+    println!("{} - {}", user1.username, user1.email);
+}</code></pre></pre>
+<h3 id="字段初始化简写"><a class="header" href="#字段初始化简写">字段初始化简写</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let username = String::from("rustacean");
+    let email = String::from("rust@example.com");
+    
+    let user = User {
+        username,  // 等价于 username: username
+        email,
+        active: true,
+        sign_in_count: 1,
+    };
+}</code></pre></pre>
+<h3 id="结构体更新语法"><a class="header" href="#结构体更新语法">结构体更新语法</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let user1 = User {
+        email: String::from("someone@example.com"),
+        username: String::from("someusername123"),
+        active: true,
+        sign_in_count: 1,
+    };
+    
+    let user2 = User {
+        email: String::from("another@example.com"),
+        ..user1  // 复用 user1 的其他字段
+    };
+    
+    // user1.username 已被移动，不能使用
+}</code></pre></pre>
+<h3 id="元组结构体"><a class="header" href="#元组结构体">元组结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Color(i32, i32, i32);
+struct Point(i32, i32, i32);
+
+fn main() {
+    let black = Color(0, 0, 0);
+    let origin = Point(0, 0, 0);
+    
+    // 访问字段
+    println!("R: {}", black.0);
+    println!("X: {}", origin.0);
+    
+    // 解构
+    let Color(r, g, b) = black;
+}</code></pre></pre>
+<h3 id="单元结构体"><a class="header" href="#单元结构体">单元结构体</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct AlwaysEqual;
+
+fn main() {
+    let subject = AlwaysEqual;
+}</code></pre></pre>
+<h2 id="42-结构体方法"><a class="header" href="#42-结构体方法">4.2 结构体方法</a></h2>
+<h3 id="impl-块"><a class="header" href="#impl-块">impl 块</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+struct Rectangle {
+    width: u32,
+    height: u32,
+}
+
+impl Rectangle {
+    // 关联函数（构造器）
+    fn new(width: u32, height: u32) -&gt; Self {
+        Rectangle { width, height }
+    }
+    
+    // 实例方法
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+    
+    fn perimeter(&amp;self) -&gt; u32 {
+        2 * (self.width + self.height)
+    }
+    
+    // 可变方法
+    fn scale(&amp;mut self, factor: u32) {
+        self.width *= factor;
+        self.height *= factor;
+    }
+    
+    // 多个参数
+    fn can_hold(&amp;self, other: &amp;Rectangle) -&gt; bool {
+        self.width &gt; other.width &amp;&amp; self.height &gt; other.height
+    }
+}
+
+fn main() {
+    let rect1 = Rectangle::new(30, 50);
+    let rect2 = Rectangle::new(10, 20);
+    
+    println!("面积：{}", rect1.area());
+    println!("周长：{}", rect1.perimeter());
+    println!("rect1 能容纳 rect2: {}", rect1.can_hold(&amp;rect2));
+    
+    println!("{:?}", rect1);  // 需要 Debug trait
+}</code></pre></pre>
+<h3 id="多个-impl-块"><a class="header" href="#多个-impl-块">多个 impl 块</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl Rectangle {
+    fn area(&amp;self) -&gt; u32 {
+        self.width * self.height
+    }
+}
+
+impl Rectangle {
+    fn perimeter(&amp;self) -&gt; u32 {
+        2 * (self.width + self.height)
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="43-枚举enum"><a class="header" href="#43-枚举enum">4.3 枚举（Enum）</a></h2>
+<h3 id="定义枚举"><a class="header" href="#定义枚举">定义枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
+fn main() {
+    let dir = Direction::North;
+    
+    match dir {
+        Direction::North =&gt; println!("向北"),
+        Direction::South =&gt; println!("向南"),
+        Direction::East =&gt; println!("向东"),
+        Direction::West =&gt; println!("向西"),
+    }
+}</code></pre></pre>
+<h3 id="带数据的枚举"><a class="header" href="#带数据的枚举">带数据的枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Message {
+    Quit,                       // 无数据
+    Move { x: i32, y: i32 },   // 命名字段
+    Write(String),              // 单个值
+    ChangeColor(i32, i32, i32), // 多个值
+}
+
+fn main() {
+    let m1 = Message::Quit;
+    let m2 = Message::Move { x: 10, y: 20 };
+    let m3 = Message::Write(String::from("hello"));
+    let m4 = Message::ChangeColor(255, 0, 0);
+}</code></pre></pre>
+<h3 id="option-枚举"><a class="header" href="#option-枚举">Option 枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let some_number: Option&lt;i32&gt; = Some(5);
+    let absent_number: Option&lt;i32&gt; = None;
+    
+    // Option 是 Rust 中最常用的枚举
+    // 替代 null，更安全
+    
+    match some_number {
+        Some(n) =&gt; println!("数字：{}", n),
+        None =&gt; println!("没有数字"),
+    }
+}</code></pre></pre>
+<h2 id="44-match-表达式"><a class="header" href="#44-match-表达式">4.4 match 表达式</a></h2>
+<h3 id="基础用法"><a class="header" href="#基础用法">基础用法</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let coin = "head";
+    
+    match coin {
+        "head" =&gt; println!("正面！"),
+        "tail" =&gt; println!("反面！"),
+        _ =&gt; println!("边缘？"),
+    }
+}</code></pre></pre>
+<h3 id="匹配枚举"><a class="header" href="#匹配枚举">匹配枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+fn value_in_cents(coin: Coin) -&gt; u8 {
+    match coin {
+        Coin::Penny =&gt; {
+            println!("幸运便士！");
+            1
+        },
+        Coin::Nickel =&gt; 5,
+        Coin::Dime =&gt; 10,
+        Coin::Quarter =&gt; 25,
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="匹配-option"><a class="header" href="#匹配-option">匹配 Option</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn plus_one(x: Option&lt;i32&gt;) -&gt; Option&lt;i32&gt; {
+    match x {
+        None =&gt; None,
+        Some(i) =&gt; Some(i + 1),
+    }
+}
+
+fn main() {
+    let five = Some(5);
+    let six = plus_one(five);
+    let none = plus_one(None);
+}</code></pre></pre>
+<h3 id="通配符和占位符"><a class="header" href="#通配符和占位符">通配符和占位符</a></h3>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let dice = 3;
+    
+    match dice {
+        1 =&gt; println!("一"),
+        2 =&gt; println!("二"),
+        3..=6 =&gt; println!("三到六"),  // 范围
+        _ =&gt; println!("其他"),         // 通配符
+    }
+    
+    let x = Some(5);
+    match x {
+        Some(5) =&gt; println!("五"),
+        Some(_) =&gt; println!("其他值"),  // 占位符
+        None =&gt; println!("无"),
+    }
+}</code></pre></pre>
+<h2 id="45-if-let"><a class="header" href="#45-if-let">4.5 if let</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn main() {
+    let config_max = Some(3u8);
+    
+    // 简洁的 match
+    if let Some(max) = config_max {
+        println!("最大值：{}", max);
+    }
+    
+    // 带 else
+    let coin = Some("head");
+    if let Some(side) = coin {
+        println!("正面：{}", side);
+    } else {
+        println!("反面");
+    }
+}</code></pre></pre>
+<h2 id="46-实战示例"><a class="header" href="#46-实战示例">4.6 实战示例</a></h2>
+<h3 id="用户系统"><a class="header" href="#用户系统">用户系统</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+struct User {
+    id: u64,
+    username: String,
+    email: String,
+}
+
+impl User {
+    fn new(id: u64, username: &amp;str, email: &amp;str) -&gt; Self {
+        User {
+            id,
+            username: username.to_string(),
+            email: email.to_string(),
+        }
+    }
+    
+    fn display(&amp;self) {
+        println!("用户 #{}: {} &lt;{}&gt;", 
+                 self.id, self.username, self.email);
+    }
+}
+
+fn main() {
+    let user = User::new(1, "rustacean", "rust@example.com");
+    user.display();
+}</code></pre></pre>
+<h3 id="形状计算"><a class="header" href="#形状计算">形状计算</a></h3>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug)]
+enum Shape {
+    Circle(f64),           // 半径
+    Rectangle(f64, f64),   // 宽，高
+    Triangle(f64, f64),    // 底，高
+}
+
+impl Shape {
+    fn area(&amp;self) -&gt; f64 {
+        match self {
+            Shape::Circle(r) =&gt; std::f64::consts::PI * r * r,
+            Shape::Rectangle(w, h) =&gt; w * h,
+            Shape::Triangle(b, h) =&gt; 0.5 * b * h,
+        }
+    }
+}
+
+fn main() {
+    let shapes = vec![
+        Shape::Circle(5.0),
+        Shape::Rectangle(10.0, 5.0),
+        Shape::Triangle(10.0, 5.0),
+    ];
+    
+    for shape in shapes {
+        println!("{:?} 面积：{:.2}", shape, shape.area());
+    }
+}</code></pre></pre>
+<h2 id="47-派生-trait"><a class="header" href="#47-派生-trait">4.7 派生 Trait</a></h2>
+<pre><pre class="playground"><code class="language-rust">#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
+
+fn main() {
+    let p1 = Point { x: 10, y: 20 };
+    let p2 = p1;  // Copy trait
+    
+    println!("{:?}", p1);  // Debug trait
+    println!("{}", p1 == p2);  // PartialEq trait
+}</code></pre></pre>
+<h3 id="常用派生宏"><a class="header" href="#常用派生宏">常用派生宏</a></h3>
+<ul>
+<li><code>Debug</code> - 调试输出 <code>{:?}</code></li>
+<li><code>Clone</code> - 深拷贝 <code>.clone()</code></li>
+<li><code>Copy</code> - 隐式复制</li>
+<li><code>PartialEq</code> - 比较 <code>==</code></li>
+<li><code>Eq</code> - 完全相等</li>
+<li><code>Hash</code> - 哈希</li>
+<li><code>Default</code> - 默认值</li>
+</ul>
+<h2 id="48-练习题"><a class="header" href="#48-练习题">4.8 练习题</a></h2>
+<ol>
+<li>创建一个表示学生的结构体，包含姓名、年龄、成绩</li>
+<li>为 Student 实现计算平均分的方法</li>
+<li>创建一个表示网络事件的枚举（连接、断开、数据）</li>
+<li>使用 match 处理不同的网络事件</li>
+</ol>
+<h2 id="49-小结"><a class="header" href="#49-小结">4.9 小结</a></h2>
+<ul>
+<li>结构体用于创建自定义数据类型</li>
+<li>impl 块定义结构体的方法</li>
+<li>枚举可以包含不同类型的数据</li>
+<li>match 强制穷尽性检查，更安全</li>
+<li>Option 枚举替代 null，避免空指针错误</li>
+</ul>
+<hr />
+<p><a href="03-ownership-borrowing.html">上一章：所有权和借用 ←</a> | <a href="05-pattern-matching.html">下一章：模式匹配 →</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch03-ownership-borrowing.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch05-pattern-matching.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch03-ownership-borrowing.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch05-pattern-matching.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

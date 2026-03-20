@@ -1,0 +1,559 @@
+<!DOCTYPE HTML>
+<html lang="zh" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>第 8 章：生命周期 - Rust 学习小册</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="一本从基础到进阶的 Rust 编程语言学习指南">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="ch01-introduction.html"><strong aria-hidden="true">1.</strong> 第 1 章：Rust 简介和安装</a></li><li class="chapter-item expanded "><a href="ch02-variables-types.html"><strong aria-hidden="true">2.</strong> 第 2 章：变量和数据类型</a></li><li class="chapter-item expanded "><a href="ch03-ownership-borrowing.html"><strong aria-hidden="true">3.</strong> 第 3 章：所有权和借用</a></li><li class="chapter-item expanded "><a href="ch04-structs-enums.html"><strong aria-hidden="true">4.</strong> 第 4 章：结构体和枚举</a></li><li class="chapter-item expanded "><a href="ch05-pattern-matching.html"><strong aria-hidden="true">5.</strong> 第 5 章：模式匹配</a></li><li class="chapter-item expanded "><a href="ch06-error-handling.html"><strong aria-hidden="true">6.</strong> 第 6 章：错误处理</a></li><li class="chapter-item expanded "><a href="ch07-generics-traits.html"><strong aria-hidden="true">7.</strong> 第 7 章：泛型和 trait</a></li><li class="chapter-item expanded "><a href="ch08-lifetimes.html" class="active"><strong aria-hidden="true">8.</strong> 第 8 章：生命周期</a></li><li class="chapter-item expanded "><a href="ch09-concurrency.html"><strong aria-hidden="true">9.</strong> 第 9 章：并发编程</a></li><li class="chapter-item expanded "><a href="ch10-project.html"><strong aria-hidden="true">10.</strong> 第 10 章：实战项目</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Rust 学习小册</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/JansenZ/rust-learning-book/edit/main/src/ch08-lifetimes.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="第-8-章生命周期"><a class="header" href="#第-8-章生命周期">第 8 章：生命周期</a></h1>
+<h2 id="81-什么是生命周期"><a class="header" href="#81-什么是生命周期">8.1 什么是生命周期？</a></h2>
+<p>生命周期是<strong>引用的有效作用域</strong>。Rust 使用生命周期确保引用不会变成悬垂引用。</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>{
+    let x = 5;      // x 的生命周期开始
+    let r = &amp;x;     // r 借用 x
+    println!("{}", r);
+}                   // x 和 r 都离开作用域
+<span class="boring">}</span></code></pre></pre>
+<h2 id="82-生命周期注解"><a class="header" href="#82-生命周期注解">8.2 生命周期注解</a></h2>
+<h3 id="基本语法"><a class="header" href="#基本语法">基本语法</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// &amp;i32        - 引用
+// &amp;'a i32     - 带有生命周期的引用
+// &amp;'a mut i32 - 带有生命周期的可变引用
+<span class="boring">}</span></code></pre></pre>
+<h3 id="函数中的生命周期"><a class="header" href="#函数中的生命周期">函数中的生命周期</a></h3>
+<pre><pre class="playground"><code class="language-rust">// 错误：编译器无法推断
+// fn longest(x: &amp;str, y: &amp;str) -&gt; &amp;str {
+//     if x.len() &gt; y.len() { x } else { y }
+// }
+
+// 正确：添加生命周期注解
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() {
+        x
+    } else {
+        y
+    }
+}
+
+fn main() {
+    let s1 = String::from("long");
+    let s2 = String::from("short");
+    
+    let result = longest(&amp;s1, &amp;s2);
+    println!("更长的是：{}", result);
+}</code></pre></pre>
+<h3 id="生命周期含义"><a class="header" href="#生命周期含义">生命周期含义</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str
+<span class="boring">}</span></code></pre></pre>
+<p>含义：<strong>返回值的生命周期与 x 和 y 中较短的那个相同</strong></p>
+<h2 id="83-生命周期规则"><a class="header" href="#83-生命周期规则">8.3 生命周期规则</a></h2>
+<h3 id="规则-1省略规则"><a class="header" href="#规则-1省略规则">规则 1：省略规则</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 每个引用参数获得独立的生命周期
+fn first_word(s: &amp;str) -&gt; &amp;str {
+    // 实际是：fn first_word&lt;'a&gt;(s: &amp;'a str) -&gt; &amp;'a str
+    let bytes = s.as_bytes();
+    for (i, &amp;item) in bytes.iter().enumerate() {
+        if item == b' ' {
+            return &amp;s[0..i];
+        }
+    }
+    s
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="规则-2一个输入生命周期"><a class="header" href="#规则-2一个输入生命周期">规则 2：一个输入生命周期</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 如果只有一个输入生命周期，它被赋值给所有输出
+fn first_word(s: &amp;str) -&gt; &amp;str {
+    // 输入生命周期自动赋值给输出
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="规则-3self-和-mut-self"><a class="header" href="#规则-3self-和-mut-self">规则 3：&amp;self 和 &amp;mut self</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;'a&gt; MyStruct&lt;'a&gt; {
+    // self 的生命周期自动推断
+    fn method(&amp;self) -&gt; &amp;str {
+        // ...
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="84-结构体中的生命周期"><a class="header" href="#84-结构体中的生命周期">8.4 结构体中的生命周期</a></h2>
+<pre><pre class="playground"><code class="language-rust">struct ImportantExcerpt&lt;'a&gt; {
+    part: &amp;'a str,
+}
+
+fn main() {
+    let novel = String::from("Rust 编程...");
+    let first_sentence = novel.split('.').next().unwrap();
+    
+    let excerpt = ImportantExcerpt {
+        part: first_sentence,
+    };
+    
+    println!("摘录：{}", excerpt.part);
+}</code></pre></pre>
+<h3 id="方法实现"><a class="header" href="#方法实现">方法实现</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>impl&lt;'a&gt; ImportantExcerpt&lt;'a&gt; {
+    fn level(&amp;self) -&gt; i32 {
+        3
+    }
+    
+    fn announce_and_return_part(&amp;self, announcement: &amp;str) -&gt; &amp;str {
+        println!("通知：{}", announcement);
+        self.part
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="85-静态生命周期"><a class="header" href="#85-静态生命周期">8.5 静态生命周期</a></h2>
+<pre><pre class="playground"><code class="language-rust">// 'static: 程序整个运行期间都有效
+let s: &amp;'static str = "字符串字面量";
+
+// 所有字符串字面量都有 'static 生命周期
+fn main() {
+    let greeting = "Hello";  // &amp;'static str
+}
+
+// 注意：'static 不意味着"永远"，而是"程序运行期间"</code></pre></pre>
+<h2 id="86-生命周期约束"><a class="header" href="#86-生命周期约束">8.6 生命周期约束</a></h2>
+<h3 id="约束语法"><a class="header" href="#约束语法">约束语法</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// T 必须存活至少 'a 这么久
+fn process&lt;T&gt;(data: &amp;'a T) 
+where 
+    T: 'a + Display 
+{
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个约束"><a class="header" href="#多个约束">多个约束</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process&lt;T, U&gt;(t: &amp;'a T, u: &amp;'b U) 
+where 
+    T: 'a + Display,
+    U: 'b + Debug,
+    'a: 'b,  // 'a 至少和 'b 一样长
+{
+    // ...
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="87-复杂示例"><a class="header" href="#87-复杂示例">8.7 复杂示例</a></h2>
+<h3 id="返回引用的结构体方法"><a class="header" href="#返回引用的结构体方法">返回引用的结构体方法</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Parser&lt;'a&gt; {
+    input: &amp;'a str,
+}
+
+impl&lt;'a&gt; Parser&lt;'a&gt; {
+    fn new(input: &amp;'a str) -&gt; Self {
+        Parser { input }
+    }
+    
+    fn parse(&amp;self) -&gt; &amp;'a str {
+        self.input.trim()
+    }
+}
+
+fn main() {
+    let text = String::from("  hello  ");
+    let parser = Parser::new(&amp;text);
+    let result = parser.parse();
+    println!("解析结果：{}", result);
+}</code></pre></pre>
+<h3 id="持有引用的枚举"><a class="header" href="#持有引用的枚举">持有引用的枚举</a></h3>
+<pre><pre class="playground"><code class="language-rust">enum Cow&lt;'a&gt; {
+    Borrowed(&amp;'a str),
+    Owned(String),
+}
+
+impl&lt;'a&gt; Cow&lt;'a&gt; {
+    fn to_owned(&amp;self) -&gt; Cow&lt;'a&gt; {
+        match self {
+            Cow::Borrowed(s) =&gt; Cow::Owned(s.to_string()),
+            Cow::Owned(s) =&gt; Cow::Owned(s.clone()),
+        }
+    }
+}
+
+fn main() {
+    let borrowed = Cow::Borrowed("hello");
+    let owned = borrowed.to_owned();
+}</code></pre></pre>
+<h2 id="88-生命周期和闭包"><a class="header" href="#88-生命周期和闭包">8.8 生命周期和闭包</a></h2>
+<pre><pre class="playground"><code class="language-rust">fn make_closure&lt;'a&gt;(x: &amp;'a i32) -&gt; impl Fn() -&gt; i32 + 'a {
+    move || *x
+}
+
+fn main() {
+    let num = 5;
+    let closure = make_closure(&amp;num);
+    println!("{}", closure());
+}</code></pre></pre>
+<h2 id="89-常见模式"><a class="header" href="#89-常见模式">8.9 常见模式</a></h2>
+<h3 id="迭代器"><a class="header" href="#迭代器">迭代器</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process_items(items: &amp;[i32]) {
+    for item in items.iter() {
+        println!("{}", item);
+    }
+}
+
+// 或
+fn process_items&lt;'a&gt;(items: &amp;'a [i32]) {
+    for item in items {
+        println!("{}", item);
+    }
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="切片"><a class="header" href="#切片">切片</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn first_element(slice: &amp;[i32]) -&gt; Option&lt;&amp;i32&gt; {
+    slice.first()
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="多个引用"><a class="header" href="#多个引用">多个引用</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn select&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="810-实战示例"><a class="header" href="#810-实战示例">8.10 实战示例</a></h2>
+<h3 id="缓存系统"><a class="header" href="#缓存系统">缓存系统</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Cache&lt;'a&gt; {
+    data: &amp;'a str,
+    cached_result: Option&lt;String&gt;,
+}
+
+impl&lt;'a&gt; Cache&lt;'a&gt; {
+    fn new(data: &amp;'a str) -&gt; Self {
+        Cache {
+            data,
+            cached_result: None,
+        }
+    }
+    
+    fn get_result(&amp;mut self) -&gt; &amp;str {
+        if self.cached_result.is_none() {
+            self.cached_result = Some(self.data.to_uppercase());
+        }
+        self.cached_result.as_ref().unwrap()
+    }
+}
+
+fn main() {
+    let text = String::from("hello");
+    let mut cache = Cache::new(&amp;text);
+    println!("{}", cache.get_result());
+}</code></pre></pre>
+<h3 id="配置解析器"><a class="header" href="#配置解析器">配置解析器</a></h3>
+<pre><pre class="playground"><code class="language-rust">struct Config&lt;'a&gt; {
+    raw: &amp;'a str,
+}
+
+impl&lt;'a&gt; Config&lt;'a&gt; {
+    fn new(raw: &amp;'a str) -&gt; Self {
+        Config { raw }
+    }
+    
+    fn get(&amp;self, key: &amp;str) -&gt; Option&lt;&amp;'a str&gt; {
+        for line in self.raw.lines() {
+            if line.starts_with(key) {
+                return Some(line.split('=').nth(1)?.trim());
+            }
+        }
+        None
+    }
+}
+
+fn main() {
+    let config_text = "host=localhost\nport=8080";
+    let config = Config::new(config_text);
+    println!("host: {:?}", config.get("host"));
+}</code></pre></pre>
+<h2 id="811-调试生命周期错误"><a class="header" href="#811-调试生命周期错误">8.11 调试生命周期错误</a></h2>
+<h3 id="常见错误"><a class="header" href="#常见错误">常见错误</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误：返回局部变量的引用
+// fn dangling() -&gt; &amp;i32 {
+//     let x = 5;
+//     &amp;x  // x 在函数结束时被释放
+// }
+
+// 正确：返回所有权
+fn not_dangling() -&gt; i32 {
+    let x = 5;
+    x
+}
+<span class="boring">}</span></code></pre></pre>
+<h3 id="生命周期不匹配"><a class="header" href="#生命周期不匹配">生命周期不匹配</a></h3>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// 错误
+// fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;str) -&gt; &amp;'a str {
+//     x  // y 没有生命周期注解
+// }
+
+// 正确
+fn longest&lt;'a&gt;(x: &amp;'a str, y: &amp;'a str) -&gt; &amp;'a str {
+    if x.len() &gt; y.len() { x } else { y }
+}
+<span class="boring">}</span></code></pre></pre>
+<h2 id="812-练习题"><a class="header" href="#812-练习题">8.12 练习题</a></h2>
+<ol>
+<li>为持有字符串切片的结构体添加生命周期</li>
+<li>编写函数返回两个切片中较长的一个</li>
+<li>解释为什么某些函数不需要显式生命周期注解</li>
+<li>创建持有多个引用的结构体</li>
+</ol>
+<h2 id="813-小结"><a class="header" href="#813-小结">8.13 小结</a></h2>
+<ul>
+<li>生命周期确保引用始终有效</li>
+<li>使用 <code>'a</code> 等标注生命周期</li>
+<li>编译器有省略规则，多数情况不需要显式标注</li>
+<li>结构体持有引用时需要生命周期参数</li>
+<li><code>'static</code> 表示程序运行期间都有效</li>
+<li>生命周期是编译时检查，无运行时开销</li>
+</ul>
+<hr />
+<p><a href="07-generics-traits.html">上一章：泛型和 trait ←</a> | <a href="09-concurrency.html">下一章：并发编程 →</a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="ch07-generics-traits.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="ch09-concurrency.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="ch07-generics-traits.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="ch09-concurrency.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
